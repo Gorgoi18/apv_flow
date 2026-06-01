@@ -1,0 +1,2627 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APV Flow - UI Refresh</title>
+<style>
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --panel-soft:#ffffffcc;
+  --ink:#233044;
+  --muted:#728197;
+  --line:#e8edf5;
+  --primary:#8b8cf7;
+  --primary-2:#93c5fd;
+  --accent:#f0f4ff;
+  --green-bg:#eafaf0;
+  --green-tx:#17603b;
+  --yellow-bg:#fff6dc;
+  --yellow-tx:#9a6800;
+  --orange-bg:#ffe7d6;
+  --orange-tx:#b45309;
+  --red-bg:#ffe2e7;
+  --red-tx:#be123c;
+  --blue-bg:#e5f3ff;
+  --blue-tx:#0369a1;
+  --shadow:0 18px 45px rgba(31,41,55,.08);
+  --radius:24px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma,Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at top left, #dbeafe 0, transparent 25%),
+    radial-gradient(circle at top right, #fce7f3 0, transparent 23%),
+    linear-gradient(180deg,#f8fbff, #f5f7fb 35%, #f7f5ff);
+}
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:280px;
+  padding:24px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.sidebarInner{
+  height:100%;
+  background:var(--panel-soft);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:32px;
+  box-shadow:var(--shadow);
+  padding:22px;
+}
+.brand{display:flex;gap:14px;align-items:center;margin-bottom:26px}
+.logo{
+  width:54px;height:54px;border-radius:20px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:#fff;font-weight:900;font-size:20px;
+}
+.brand h1{margin:0;font-size:22px}
+.brand p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.menuTitle{
+  margin:18px 0 10px;
+  color:#97a3b4;font-size:11px;
+  font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+}
+.nav button{
+  width:100%;border:0;cursor:pointer;text-align:left;
+  background:transparent;color:#607086;
+  padding:13px 14px;border-radius:18px;
+  font-size:14px;font-weight:800;margin-bottom:8px;
+}
+.nav button.active{
+  background:linear-gradient(135deg,#efe9ff,#e8f2ff);
+  color:#5b3fc2;
+  box-shadow:0 12px 24px rgba(91,63,194,.10);
+}
+.sideNote{
+  margin-top:18px;padding:16px;border-radius:22px;
+  background:linear-gradient(135deg,#fff7ed,#eff6ff);
+  border:1px solid #fff;
+  color:#5b6473;font-size:13px;line-height:1.5;
+}
+.main{
+  flex:1;
+  padding:28px 30px 40px 4px;
+}
+.topbar{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+  margin-bottom:18px;
+}
+.topbar h2{font-size:34px;margin:0;line-height:1.18}
+.topbar p{margin:8px 0 0;color:var(--muted)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.btn{
+  border:1px solid transparent;cursor:pointer;border-radius:16px;
+  padding:11px 15px;font-weight:900;font-size:13px;
+  background:#ede9fe;color:#5b3fc2;
+  border-color:#c4b5fd;box-shadow:none;
+  transition:background .15s, border-color .15s;
+}
+.btn:hover{background:#ddd6fe;border-color:#a78bfa}
+.btn.light{
+  background:#f1f5f9;color:#4d5b6f;border:1px solid #e2e8f0;box-shadow:none;
+}
+.btn.light:hover{background:#e2e8f0;border-color:#cbd5e1}
+.btn.red{
+  background:#fee2e2;color:#be123c;border:1px solid #fca5a5;box-shadow:none;
+}
+.btn.red:hover{background:#fecaca}
+.btn.small{
+  padding:8px 10px;font-size:12px;border-radius:12px;
+}
+.card{
+  background:var(--panel-soft);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:20px;
+  margin-bottom:18px;
+}
+.card h3{margin:0 0 8px}
+.card p.muted{margin:0;color:var(--muted);font-size:13px}
+.notice{
+  padding:13px 15px;border-radius:18px;
+  background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;
+  margin-bottom:18px;
+}
+.notice.ok{
+  background:#ecfdf5;color:#166534;border-color:#bbf7d0;
+}
+.settings{
+  display:grid;grid-template-columns:1fr 1.5fr auto;gap:12px;align-items:end;
+}
+label{display:block;margin-bottom:6px;font-size:13px;color:#63748b;font-weight:800}
+input, select, textarea{
+  width:100%;padding:12px 14px;border-radius:16px;
+  border:1px solid var(--line);background:#fff;outline:none;
+  color:#425268;
+}
+.summary{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+}
+.metric{
+  position:relative;overflow:hidden;min-height:120px;
+}
+.metric::after{
+  content:"";position:absolute;right:-34px;bottom:-40px;
+  width:110px;height:110px;border-radius:50%;
+  background:var(--blob,#eff6ff);
+}
+.metric .label{font-size:13px;color:var(--muted);position:relative;z-index:1}
+.metric .value{font-size:31px;font-weight:900;margin-top:10px;position:relative;z-index:1}
+.metric .sub{font-size:12px;color:var(--muted);margin-top:6px;position:relative;z-index:1}
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+.barRow{margin:14px 0}
+.barLabel{display:flex;justify-content:space-between;font-size:14px;margin-bottom:7px}
+.track{height:12px;background:#edf2f7;border-radius:999px;overflow:hidden}
+.fill{height:100%;border-radius:999px}
+.fill.green{background:#86efac}.fill.yellow{background:#fcd34d}.fill.orange{background:#fb923c}.fill.red{background:#fb7185}.fill.blue{background:#93c5fd}
+.simpleTableWrap{overflow:auto}
+.simpleTable{width:100%;border-collapse:collapse}
+.simpleTable th,.simpleTable td{border-bottom:1px solid var(--line);padding:10px;text-align:left;font-size:13px}
+.simpleTable th{color:#77859a;font-size:12px}
+.manager{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.manager .group{display:flex;gap:10px;flex-wrap:wrap}
+.toolbar{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.search{min-width:320px}
+.tableWrap{overflow:auto}
+table.mainTable{
+  width:100%;min-width:1180px;
+  border-collapse:separate;border-spacing:0 10px;
+}
+.mainTable th{
+  text-align:left;padding:0 12px 4px;
+  color:#8593a8;font-size:12px;font-weight:800;
+}
+.mainTable td{
+  background:#fff;padding:14px 12px;border-top:1px solid #eef2f7;border-bottom:1px solid #eef2f7;
+  font-size:14px;vertical-align:middle;
+}
+.mainTable td:first-child{border-left:1px solid #eef2f7;border-radius:16px 0 0 16px}
+.mainTable td:last-child{border-right:1px solid #eef2f7;border-radius:0 16px 16px 0}
+.company{
+  max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.badge{
+  display:inline-flex;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap;
+}
+.green{background:var(--green-bg);color:var(--green-tx)}
+.yellow{background:var(--yellow-bg);color:var(--yellow-tx)}
+.orange{background:var(--orange-bg);color:var(--orange-tx)}
+.red{background:var(--red-bg);color:var(--red-tx)}
+.blue{background:var(--blue-bg);color:var(--blue-tx)}
+.actionRow{display:flex;gap:6px;flex-wrap:wrap}
+.overdueCard{border:1px dashed #fbcfe8;background:linear-gradient(135deg,#fff7fb,#fff)}
+.overdueTitle{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;
+}
+.overdueTitle h3{margin:0}
+.overdueTitle p{margin:6px 0 0;color:var(--muted);font-size:13px}
+dialog{
+  border:0;border-radius:28px;padding:0;
+  box-shadow:0 30px 80px rgba(15,23,42,.22);
+  width:min(760px,94vw);
+}
+/* Daily Report dialog */
+#reportDialog{width:min(860px,96vw);max-height:90vh}
+#reportDialog .modal{max-height:90vh;overflow-y:auto;padding:28px 30px}
+.rptHeader{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:20px;flex-wrap:wrap;gap:12px;
+}
+.rptTitle{margin:0;font-size:22px}
+.rptDate{font-size:13px;color:var(--muted);margin-top:4px}
+.rptActions{display:flex;gap:8px}
+.rptSection{margin-bottom:24px}
+.rptSection h4{
+  margin:0 0 12px;font-size:14px;font-weight:800;
+  padding:10px 14px;border-radius:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.rptSection h4.green{background:#eafaf0;color:#17603b}
+.rptSection h4.blue{background:#e5f3ff;color:#0369a1}
+.rptSection h4.orange{background:#fff6dc;color:#9a6800}
+.rptSection h4.red{background:#ffe2e7;color:#be123c}
+.rptSection h4.purple{background:#ede9fe;color:#5b3fc2}
+.rptTable{width:100%;border-collapse:collapse;font-size:13px}
+.rptTable th{
+  background:#f5f7fb;color:#728197;font-size:11px;font-weight:800;
+  padding:9px 10px;text-align:left;border-bottom:2px solid #e8edf5;
+}
+.rptTable td{
+  padding:10px 10px;border-bottom:1px solid #f0f4f8;vertical-align:middle;
+}
+.rptTable tr:last-child td{border-bottom:none}
+.rptTable .money{text-align:right;font-weight:700}
+.rptSummaryGrid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  margin-bottom:22px;
+}
+.rptKpi{
+  background:#f8faff;border:1px solid var(--line);border-radius:18px;
+  padding:16px;text-align:center;
+}
+.rptKpi .rk-val{font-size:26px;font-weight:900;color:var(--ink)}
+.rptKpi .rk-lbl{font-size:12px;color:var(--muted);margin-top:5px}
+.rptKpi .rk-sub{font-size:11px;color:#8b8cf7;margin-top:3px;font-weight:700}
+.rptEmpty{text-align:center;color:var(--muted);font-size:13px;padding:18px}
+.rptDatePicker{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+  padding:14px 18px;border-radius:18px;background:#f8faff;border:1px solid var(--line);
+}
+.rptDatePicker label{font-size:13px;color:#63748b;font-weight:800;white-space:nowrap}
+.rptDatePicker input{width:160px;padding:8px 12px;border-radius:12px;border:1px solid var(--line)}
+@media print{
+  body > *:not(#reportDialog){ display:none!important }
+  #reportDialog{ display:block!important;box-shadow:none }
+  .rptActions,.rptDatePicker,.modalActions{ display:none!important }
+}
+/* Login dialog */
+#loginDialog{width:min(420px,94vw)}
+#loginDialog::backdrop{background:rgba(15,23,42,.55);backdrop-filter:blur(6px)}
+.loginBox{padding:36px 32px;text-align:center}
+.loginLogo{
+  width:68px;height:68px;border-radius:24px;margin:0 auto 18px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:#fff;font-weight:900;font-size:24px;
+}
+.loginBox h2{margin:0 0 6px;font-size:22px}
+.loginBox p{margin:0 0 22px;color:var(--muted);font-size:14px}
+.loginInput{
+  width:100%;padding:14px 16px;border-radius:18px;border:2px solid var(--line);
+  font-size:16px;color:var(--ink);outline:none;text-align:center;
+  transition:border-color .2s;
+}
+.loginInput:focus{border-color:var(--primary)}
+.loginBtn{
+  width:100%;margin-top:14px;padding:15px;border-radius:18px;border:0;
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:#fff;font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 8px 20px rgba(139,140,247,.3);transition:opacity .2s;
+}
+.loginBtn:hover{opacity:.9}
+.viewerNotice{
+  margin-top:12px;padding:10px 14px;border-radius:14px;
+  background:#fff8e1;border:1px solid #ffe082;
+  color:#795548;font-size:12px;
+}
+/* User info in sidebar */
+.userCard{
+  margin-top:auto;padding:14px;border-radius:22px;
+  background:linear-gradient(135deg,#f0edff,#e8f2ff);
+  border:1px solid rgba(255,255,255,.8);
+}
+.userCard .uname{font-size:14px;font-weight:800;color:#5b3fc2}
+.userCard .urole{font-size:12px;color:var(--muted);margin-top:3px}
+.userCard .ulogout{
+  margin-top:10px;width:100%;padding:8px;border-radius:12px;border:0;
+  background:#fff;color:#be123c;font-size:12px;font-weight:700;cursor:pointer;
+}
+.viewerBadge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:999px;
+  background:#fff8e1;border:1px solid #ffe082;
+  color:#795548;font-size:12px;font-weight:700;
+}
+.modal{padding:22px}
+.modal h3{margin:0 0 10px}
+.modalGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+.detailGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.detailBox{
+  background:#f9fbff;border:1px solid var(--line);border-radius:18px;padding:12px;
+}
+.detailBox span{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.detailBox b{font-size:14px}
+.detailBox.span-full{grid-column:1/-1}
+.detailBox.span-2{grid-column:span 2}
+/* LINE preview in daily report */
+.linePreviewWrap{border-radius:18px;padding:16px 18px;font-size:13px;line-height:1.8;font-family:Tahoma,sans-serif;max-height:380px;overflow-y:auto}
+.linePreviewWrap.lp-green{background:#e8f5e9;color:#1b3a1e}
+.linePreviewWrap.lp-blue{background:#e5f3ff;color:#0c2a4a}
+.linePreviewWrap.lp-amber{background:#fff8e1;color:#3d2800}
+.lpDivider{letter-spacing:.05em;margin:8px 0;font-size:12px;opacity:.5}
+.lp-green .lpDivider{color:#81c784}
+.lp-blue  .lpDivider{color:#93c5fd}
+.lp-amber .lpDivider{color:#fcd34d}
+.lpMonth{font-weight:900;margin-bottom:4px}
+.lp-green .lpMonth{color:#1b5e20}
+.lp-blue  .lpMonth{color:#0c4a8a}
+.lp-amber .lpMonth{color:#78350f}
+.lpMonthSub{font-weight:400;font-size:12px}
+.lp-green .lpMonthSub{color:#388e3c}
+.lp-blue  .lpMonthSub{color:#1e6fb5}
+.lp-amber .lpMonthSub{color:#b45309}
+.lpComp{font-weight:800;margin-top:6px}
+.lp-green .lpComp{color:#2e7d32}
+.lp-blue  .lpComp{color:#0d5fa0}
+.lp-amber .lpComp{color:#92400e}
+.lpItem{padding-left:12px;color:#37474f}
+.lpRecno{font-weight:700;color:#1565c0}
+.lpVoucher{font-weight:700;color:#6a1b9a;background:#f3e5f5;padding:1px 6px;border-radius:6px}
+.lpSla{color:#c62828;font-size:12px;font-weight:700}
+.lpAmt{font-size:12px}
+.lp-green .lpAmt{color:#558b2f}
+.lp-blue  .lpAmt{color:#1e6fb5}
+.lp-amber .lpAmt{color:#b45309}
+.lpCompTotal{padding-left:12px;font-weight:700;font-size:12px;margin-bottom:4px}
+.lp-green .lpCompTotal{color:#2e7d32}
+.lp-blue  .lpCompTotal{color:#0d5fa0}
+.lp-amber .lpCompTotal{color:#92400e}
+.modalActions{
+  margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;
+}
+.helper{
+  font-size:12px;color:var(--muted);margin-top:8px;
+}
+@media (max-width:1200px){
+  .summary{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:1024px){
+  .layout{display:block}
+  .sidebar{width:100%;height:auto;position:static;padding:20px 20px 0}
+  .main{padding:20px}
+  .grid2,.settings,.modalGrid,.detailGrid,.summary{grid-template-columns:1fr}
+  .search{min-width:0;width:100%}
+  .topbar{flex-direction:column}
+  .actions{justify-content:flex-start}
+}
+
+/* ===== Table refresh ===== */
+.mainTable{
+  width:100%;
+  min-width:1120px;
+  border-collapse:separate;
+  border-spacing:0 6px !important;
+}
+.mainTable th{
+  padding:0 10px 6px !important;
+  font-size:11px !important;
+  letter-spacing:.02em;
+}
+.mainTable td{
+  padding:12px 10px !important;
+  font-size:13px !important;
+  line-height:1.25;
+}
+.mainTable td:first-child{border-radius:14px 0 0 14px}
+.mainTable td:last-child{border-radius:0 14px 14px 0}
+.mainTable .numCell b{font-size:16px}
+.mainTable .moneyCell{
+  text-align:right;
+  white-space:nowrap;
+  font-weight:900;
+  font-size:15px;
+}
+.mainTable .centerCell{
+  text-align:center;
+  white-space:nowrap;
+}
+.mainTable .dateCell{
+  white-space:nowrap;
+  color:#425268;
+}
+.mainTable .projectCell{
+  white-space:nowrap;
+  color:#425268;
+}
+.company{
+  max-width:300px !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.rowMenuWrap{
+  position:relative;
+  display:flex;
+  justify-content:center;
+}
+.rowMenuBtn{
+  width:38px;height:38px;border-radius:12px;
+  border:1px solid var(--line);
+  background:#fff;color:#516173;
+  font-weight:900;cursor:pointer;
+}
+.rowMenu{
+  position:absolute;
+  top:44px; right:0;
+  min-width:180px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 16px 38px rgba(15,23,42,.12);
+  padding:8px;
+  z-index:30;
+  display:none;
+}
+.rowMenu.open{display:block}
+.rowMenu button{
+  width:100%;
+  text-align:left;
+  border:0;
+  background:transparent;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  color:#425268;
+  font-weight:700;
+}
+.rowMenu button:hover{
+  background:#f8fafc;
+}
+.rowSub{
+  display:block;
+  font-size:11px;
+  color:#94a3b8;
+  margin-top:2px;
+}
+.recMain{
+  font-size:16px;
+  font-weight:900;
+}
+.compactBadge .badge{
+  padding:6px 10px;
+  font-size:11px;
+}
+@media (max-width:1024px){
+  .mainTable{min-width:980px}
+  .company{max-width:220px !important}
+}
+
+
+/* ===== Font size update to match requested table style ===== */
+.mainTable{
+  border-spacing:0 0 !important;
+  min-width:1120px;
+}
+.mainTable th{
+  font-size:14px !important;
+  padding:0 12px 14px !important;
+  font-weight:800 !important;
+  color:#7b879b !important;
+}
+.mainTable td{
+  padding:12px 12px !important;
+  font-size:16px !important;
+  line-height:1.28 !important;
+  border-radius:0 !important;
+  border-left:0 !important;
+  border-right:0 !important;
+  background:#fff !important;
+}
+.mainTable td:first-child{
+  border-radius:0 !important;
+}
+.mainTable td:last-child{
+  border-radius:0 !important;
+}
+.mainTable .recMain{
+  font-size:18px !important;
+  font-weight:900 !important;
+  letter-spacing:.01em;
+}
+.mainTable .company{
+  font-size:16px !important;
+  max-width:360px !important;
+}
+.mainTable .dateCell,
+.mainTable .projectCell{
+  font-size:16px !important;
+}
+.mainTable .moneyCell{
+  font-size:16px !important;
+  font-weight:900 !important;
+}
+.mainTable .badge{
+  font-size:15px !important;
+  padding:0 !important;
+  background:transparent !important;
+  color:#233044 !important;
+  font-weight:500 !important;
+}
+.mainTable .centerCell{
+  text-align:left !important;
+}
+.rowMenuBtn{
+  width:34px !important;
+  height:34px !important;
+  border-radius:12px !important;
+  font-size:18px;
+}
+.tableWrap{
+  border-top:1px solid var(--line);
+}
+
+
+/* ===== User requested adjustments ===== */
+.sectionTitleClean{
+  margin:0;
+  font-size:18px;
+  line-height:1.35;
+  font-weight:900;
+  color:var(--ink);
+}
+.sectionDescClean{
+  margin:6px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+.nav button{
+  min-height:46px !important;
+  padding:13px 14px !important;
+  font-size:14px !important;
+  line-height:1.25 !important;
+  display:flex;
+  align-items:center;
+}
+.mainTable th:last-child{
+  text-align:center !important;
+}
+.actionDots{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#425268;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+}
+.actionDots:hover{
+  background:#f8fafc;
+  border-color:#dbe3ef;
+}
+.detailActionsBox{
+  margin-top:16px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#f8fafc;
+}
+.detailActionsBox h4{
+  margin:0 0 10px;
+  font-size:15px;
+  color:var(--ink);
+}
+.detailActionButtons{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.detailActionButtons .btn{
+  box-shadow:none;
+}
+.detailActionButtons .btn.light{
+  background:#fff;
+}
+.mainListHeader{
+  margin-bottom:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+
+/* ===== Pastel Action Buttons ===== */
+.btn.p-green {background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;box-shadow:none}
+.btn.p-green:hover{background:#a7f3d0;border-color:#6ee7b7}
+.btn.p-purple{background:#ede9fe;color:#4c1d95;border:1px solid #c4b5fd;box-shadow:none}
+.btn.p-purple:hover{background:#ddd6fe;border-color:#a78bfa}
+.btn.p-blue  {background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;box-shadow:none}
+.btn.p-blue:hover{background:#bfdbfe;border-color:#60a5fa}
+.btn.p-orange{background:#fff7ed;color:#92400e;border:1px solid #fed7aa;box-shadow:none}
+.btn.p-orange:hover{background:#fed7aa;border-color:#fbbf24}
+.btn.p-red   {background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;box-shadow:none}
+.btn.p-red:hover{background:#fecaca;border-color:#f87171}
+.btn.p-gray  {background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;box-shadow:none}
+.btn.p-gray:hover{background:#e2e8f0;border-color:#cbd5e1}
+.btn.p-teal  {background:#ccfbf1;color:#0f766e;border:1px solid #99f6e4;box-shadow:none}
+.btn.p-teal:hover{background:#99f6e4;border-color:#2dd4bf}
+.btn.p-cyan  {background:#cffafe;color:#0e7490;border:1px solid #a5f3fc;box-shadow:none}
+.btn.p-cyan:hover{background:#a5f3fc;border-color:#22d3ee}
+.btn.p-amber {background:#fef3c7;color:#92400e;border:1px solid #fde68a;box-shadow:none}
+.btn.p-amber:hover{background:#fde68a;border-color:#fbbf24}
+.btn.p-pink  {background:#fce7f3;color:#9d174d;border:1px solid #fbcfe8;box-shadow:none}
+.btn.p-pink:hover{background:#fbcfe8;border-color:#f9a8d4}
+
+/* ===== Unified font + compact table (definitive) ===== */
+.mainTable{ border-spacing:0 4px !important; }
+.mainTable th{ font-size:12px !important; padding:0 10px 6px !important; color:#8593a8 !important; font-weight:700 !important; }
+.mainTable td{ font-size:13px !important; padding:8px 10px !important; line-height:1.3 !important; }
+.mainTable .recMain{ font-size:13px !important; font-weight:900 !important; letter-spacing:.01em; }
+.mainTable .moneyCell{ font-size:13px !important; font-weight:700 !important; text-align:right; white-space:nowrap; }
+.mainTable .company{ font-size:13px !important; }
+.mainTable .dateCell{ font-size:13px !important; white-space:nowrap; }
+.mainTable .projectCell{ font-size:13px !important; }
+.mainTable .centerCell{ font-size:13px !important; }
+.mainTable .badge{ font-size:12px !important; padding:4px 9px !important; font-weight:700 !important; }
+
+/* ===== Delay badge colors ===== */
+.dl-ok   { display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#dbeafe;color:#1e40af; }
+.dl-1    { display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#d1fae5;color:#065f46; }
+.dl-2    { display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#fef9c3;color:#854d0e; }
+.dl-3    { display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#ffedd5;color:#9a3412; }
+.dl-4    { display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#fce7f3;color:#9d174d; }
+
+/* ===== UI Fix: title equality + sidebar like screenshot ===== */
+
+/* Sidebar */
+.sidebar{
+  width:264px !important;
+  padding:0 !important;
+  background:transparent !important;
+}
+.sidebarInner{
+  width:264px !important;
+  min-height:100vh !important;
+  border-radius:0 30px 30px 0 !important;
+  padding:28px 26px !important;
+  background:rgba(255,255,255,.86) !important;
+  box-shadow:0 18px 48px rgba(31,41,55,.10) !important;
+  border:0 !important;
+}
+.brand{
+  gap:14px !important;
+  align-items:center !important;
+  margin-bottom:30px !important;
+}
+.logo{
+  width:60px !important;
+  height:60px !important;
+  border-radius:22px !important;
+  font-size:24px !important;
+  font-weight:900 !important;
+  background:linear-gradient(135deg,#a7a7ff,#84b7ff) !important;
+  box-shadow:none !important;
+}
+.brand h1{
+  font-size:28px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  margin:0 !important;
+  color:#233044 !important;
+}
+.brand p{
+  font-size:12px !important;
+  line-height:1.15 !important;
+  color:#718096 !important;
+  margin:6px 0 0 !important;
+}
+.menuTitle{
+  font-size:13px !important;
+  letter-spacing:.08em !important;
+  font-weight:900 !important;
+  color:#9aa5b8 !important;
+  margin:22px 0 14px !important;
+}
+.nav button{
+  width:100% !important;
+  min-height:58px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding:0 18px !important;
+  border-radius:20px !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  color:#607086 !important;
+  margin-bottom:8px !important;
+  line-height:1.2 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.nav button.active{
+  background:linear-gradient(135deg,#efe7ff,#e3efff) !important;
+  color:#5f47d8 !important;
+  box-shadow:0 18px 34px rgba(112,84,210,.13) !important;
+}
+.sideNote{
+  margin-top:18px !important;
+  padding:22px 20px !important;
+  border-radius:24px !important;
+  background:linear-gradient(135deg,#ffffff,#edf5ff) !important;
+  font-size:14px !important;
+  line-height:1.55 !important;
+  color:#5b6473 !important;
+  box-shadow:none !important;
+}
+
+/* Main should start after fixed width sidebar */
+.main{
+  padding:28px 30px 40px 24px !important;
+}
+
+/* Titles: make รายการเอกสารตัดรับ equal to รายการต้องติดตาม */
+.overdueTitle h3,
+.mainListHeader h3,
+.mainListHeader h3.sectionTitleClean,
+h3.sectionTitleClean{
+  font-family:Tahoma,Arial,sans-serif !important;
+  font-size:21px !important;
+  line-height:1.35 !important;
+  font-weight:900 !important;
+  margin:0 !important;
+  color:#233044 !important;
+}
+.overdueTitle p,
+.mainListHeader p,
+.mainListHeader .sectionDescClean,
+.sectionDescClean{
+  font-family:Tahoma,Arial,sans-serif !important;
+  font-size:13px !important;
+  line-height:1.45 !important;
+  margin:7px 0 0 !important;
+  color:#728197 !important;
+}
+.mainListHeader,
+.overdueTitle{
+  margin-bottom:16px !important;
+}
+
+/* Make list card cleaner */
+.mainListHeader + .toolbar{
+  padding-top:0 !important;
+}
+.toolbar .search{
+  height:48px !important;
+  border-radius:18px !important;
+}
+.filters select{
+  height:48px !important;
+  border-radius:18px !important;
+}
+
+/* Table title area spacing */
+.card:has(.mainListHeader){
+  padding-top:24px !important;
+}
+
+/* Keep Action column name and clean dots button */
+.actionDots{
+  width:38px !important;
+  height:38px !important;
+  border-radius:14px !important;
+  border:1px solid #c4b5fd !important;
+  background:#ede9fe !important;
+  color:#5b3fc2 !important;
+  font-size:18px !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+  transition:background .15s !important;
+}
+.actionDots:hover{
+  background:#ddd6fe !important;
+  border-color:#a78bfa !important;
+}
+
+/* Popup action buttons */
+.detailActionsBox{
+  margin-top:18px !important;
+  padding:16px !important;
+  border-radius:20px !important;
+  border:1px solid #e8edf5 !important;
+  background:#f8fafc !important;
+}
+.detailActionsBox h4{
+  margin:0 0 12px !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  color:#233044 !important;
+}
+.detailActionButtons{
+  display:flex !important;
+  gap:8px !important;
+  flex-wrap:wrap !important;
+}
+
+/* Responsive */
+@media (max-width:1024px){
+  .sidebar{width:100% !important}
+  .sidebarInner{
+    width:auto !important;
+    min-height:auto !important;
+    border-radius:0 0 30px 30px !important;
+  }
+  .main{padding:20px !important}
+}
+
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebarInner">
+      <div class="brand">
+        <div class="logo">APV</div>
+        <div>
+          <h1>APV Flow</h1>
+          <p>รับเอกสาร · SLA · ตั้งหนี้</p>
+        </div>
+      </div>
+
+      <div class="menuTitle">Navigation</div>
+      <div class="nav">
+        <button class="active" onclick="setTab('completed_invoice',this)">🏠 Dashboard</button>
+        <button onclick="setTab('waiting_receive',this)">📄 รอรับเอกสาร</button>
+        <button onclick="setTab('pending_invoice',this)">🧾 รอตั้งหนี้</button>
+      </div>
+
+      <div class="menuTitle">Status</div>
+      <div class="sideNote">
+        UI เวอร์ชันนี้เน้นความสะอาดตาและใช้ง่ายขึ้น<br>
+        พร้อมฟังก์ชันเดิม: Dashboard, SLA, LINE Copy, Backup, Restore, Clear Data
+      </div>
+
+      <!-- User Card -->
+      <div id="userCard" class="userCard" style="margin-top:20px">
+        <div class="uname" id="ucName">-</div>
+        <div class="urole" id="ucRole">-</div>
+        <button class="ulogout" onclick="doLogout()">🚪 ออกจากระบบ</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2>Dashboard เอกสารตัดรับ APV</h2>
+        <span id="viewerBadge" class="viewerBadge" style="display:none">👁 โหมดดูอย่างเดียว</span>
+      </div>
+      <div class="actions">
+        <button class="btn light" onclick="loadData()">Refresh</button>
+        <button class="btn p-teal" onclick="openDailyReport()">📊 รายงานประจำวัน</button>
+        <button class="btn light admin-only" onclick="loadImportLogs()">Import Log</button>
+        <button class="btn admin-only" onclick="exportCsv()">Export รายการ</button>
+        <button class="btn p-amber admin-only" id="btnFetchMango" onclick="fetchMango()">📥 Fetch จาก Mango</button>
+      </div>
+    </div>
+
+    <div id="msg" class="notice">ใส่ Supabase URL และ anon key แล้วกด “บันทึกและโหลดข้อมูล”</div>
+
+    <section class="card admin-only">
+      <div class="settings">
+        <div>
+          <label>Supabase URL</label>
+          <input id="supabaseUrl" placeholder="https://xxxx.supabase.co">
+        </div>
+        <div>
+          <label>Supabase anon public key</label>
+          <input id="supabaseKey" type="password" placeholder="eyJ...">
+        </div>
+        <input id="apvFlowUrl" type="hidden">
+        <button class="btn" onclick="saveConfigAndLoad()">บันทึกและโหลดข้อมูล</button>
+      </div>
+      <div class="helper">Key จะเก็บไว้ในเครื่องนี้ผ่าน localStorage เพื่อให้ใช้งานสะดวกขึ้น</div>
+    </section>
+
+    <section class="card admin-only">
+      <div class="manager">
+        <div>
+          <h3>จัดการข้อมูล</h3>
+          <p class="muted">Backup ได้ตลอดเวลา, Restore จาก CSV, และเคลียร์ข้อมูลเก่าตามปี</p>
+        </div>
+        <div class="group">
+          <select id="backupYear"><option value="">ทุกปี</option></select>
+          <button class="btn" onclick="exportBackup()">Backup ข้อมูล</button>
+          <button class="btn p-cyan" onclick="document.getElementById('restoreFile').click()">Restore CSV</button>
+          <button class="btn red" onclick="openClearDialog()">เคลียร์ข้อมูลเก่า</button>
+          <input id="restoreFile" type="file" accept=".csv" style="display:none" onchange="previewRestoreCsv(event)">
+        </div>
+      </div>
+      <div id="restorePreview" class="notice" style="display:none;margin-top:14px"></div>
+    </section>
+
+    <!-- LINE Notification -->
+    <section class="card admin-only">
+      <div class="manager">
+        <div>
+          <h3>📱 แจ้ง LINE รายวัน</h3>
+          <p class="muted">ส่งสรุปยอดรวมให้จัดซื้อ + บัญชี ในครั้งเดียว (Python Runner ต้องรันอยู่)</p>
+        </div>
+        <div class="group">
+          <button class="btn p-cyan" id="btnLineSummary" onclick="sendLineDailySummary()">
+            📋 ส่งสรุปรายวัน LINE
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Management (admin-only หรือถ้ายังไม่มี admin ให้เห็นได้) -->
+    <section class="card" id="sec-adminMgr">
+      <div class="manager">
+        <div>
+          <h3>👤 จัดการสิทธิ์ Admin</h3>
+          <p class="muted">ชื่อที่อยู่ในรายการนี้จะมีสิทธิ์แก้ไขข้อมูล — คนอื่นดูได้อย่างเดียว</p>
+        </div>
+        <div class="group">
+          <input id="newAdminName" placeholder="ชื่อ Admin ใหม่" style="min-width:180px">
+          <button class="btn" onclick="addAdmin()">+ เพิ่ม</button>
+        </div>
+      </div>
+      <div id="adminList" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"></div>
+    </section>
+
+    <!-- === Dashboard: metrics (รอรับเอกสาร tab) === -->
+    <section class="summary" id="sec-metrics">
+      <div class="card metric" style="--blob:#eceaff">
+        <div class="label">ทั้งหมด</div>
+        <div class="value" id="sumAll">0</div>
+        <div class="sub" id="sumNet">0.00</div>
+      </div>
+      <div class="card metric" style="--blob:#fff4d8">
+        <div class="label">รอรับเอกสาร</div>
+        <div class="value" id="sumWaiting">0</div>
+        <div class="sub">ยังไม่รับเอกสาร</div>
+      </div>
+      <div class="card metric" style="--blob:#dbeafe">
+        <div class="label">รอตั้งหนี้</div>
+        <div class="value" id="sumPendingInvoice">0</div>
+        <div class="sub">พร้อมดำเนินการ</div>
+      </div>
+      <div class="card metric" style="--blob:#ffe2e7">
+        <div class="label">เกิน SLA</div>
+        <div class="value" id="sumOverSla">0</div>
+        <div class="sub" id="overRate">0%</div>
+      </div>
+    </section>
+
+    <!-- === Dashboard Analytics (ตั้งหนี้แล้ว) === -->
+    <section class="summary" id="sec-dash-metrics" style="display:none">
+      <div class="card metric" style="--blob:#eceaff">
+        <div class="label">ตั้งหนี้แล้ว</div>
+        <div class="value" id="dTotal">0</div>
+        <div class="sub" id="dNet">0.00</div>
+      </div>
+      <div class="card metric" style="--blob:#fce7f3">
+        <div class="label">ล่าช้า</div>
+        <div class="value" id="dLate">0</div>
+        <div class="sub" id="dLateRate">0% ของทั้งหมด</div>
+      </div>
+      <div class="card metric" style="--blob:#fff7ed">
+        <div class="label">เฉลี่ยล่าช้า</div>
+        <div class="value" id="dAvgDelay">0</div>
+        <div class="sub">วัน (เฉพาะที่ล่าช้า)</div>
+      </div>
+      <div class="card metric" style="--blob:#dcfce7">
+        <div class="label">ตรงเวลา</div>
+        <div class="value" id="dOnTime">0</div>
+        <div class="sub" id="dOnTimeRate">0% ของทั้งหมด</div>
+      </div>
+      <div class="card metric" style="--blob:#dbeafe">
+        <div class="label">โครงการ</div>
+        <div class="value" id="dProjects">0</div>
+        <div class="sub">โครงการที่มีรายการ</div>
+      </div>
+    </section>
+
+    <section id="sec-dash-grid" style="display:none">
+      <!-- Row 1: SLA bars + Project summary -->
+      <div class="grid2" style="margin-bottom:18px">
+        <div class="card">
+          <h3>SLA Report (ตั้งหนี้แล้ว)</h3>
+          <p class="muted">สัดส่วนความล่าช้าของเอกสารที่ตั้งหนี้แล้ว</p>
+          <div id="dashSlaBars" style="margin-top:14px"></div>
+        </div>
+        <div class="card">
+          <h3>สรุปตามโครงการ</h3>
+          <p class="muted">จำนวน, ล่าช้า, % ล่าช้า และมูลค่า</p>
+          <div class="simpleTableWrap" style="margin-top:12px">
+            <table class="simpleTable">
+              <thead><tr><th>รหัส</th><th>ชื่อโครงการ</th><th>ผู้ดูแล</th><th>ทั้งหมด</th><th>ล่าช้า</th><th>% ล่าช้า</th><th>มูลค่า</th></tr></thead>
+              <tbody id="dashProjectTable"><tr><td colspan="7">ยังไม่มีข้อมูล</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Row 2: Supplier delay analysis -->
+      <div class="card" style="margin-bottom:18px">
+        <h3>ซัพพลายเออร์ที่ล่าช้าบ่อย 🔴</h3>
+        <p class="muted">เรียงตามจำนวนครั้งที่ล่าช้ามากที่สุด — ใช้ระบุปัญหาซ้ำและวางแผนแก้ไข</p>
+        <div class="simpleTableWrap" style="margin-top:12px">
+          <table class="simpleTable">
+            <thead><tr><th>#</th><th>ซัพพลายเออร์</th><th>ครั้งทั้งหมด</th><th>ล่าช้า</th><th>% ล่าช้า</th><th>ล่าช้าเฉลี่ย (วัน)</th><th>ล่าช้าสูงสุด (วัน)</th><th>มูลค่า</th></tr></thead>
+            <tbody id="dashSupplierTable"><tr><td colspan="8">ยังไม่มีข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- === รอรับเอกสาร: SLA + Project summary === -->
+    <section class="grid2" id="sec-sla-grid">
+      <div class="card">
+        <h3>SLA Report</h3>
+        <p class="muted">สรุปสถานะ SLA ตามตัวกรองปัจจุบัน</p>
+        <div id="slaBars" style="margin-top:14px"></div>
+      </div>
+      <div class="card">
+        <h3>สรุปตามโครงการ</h3>
+        <p class="muted">จำนวนรายการ, รอรับเอกสาร, เกิน SLA และมูลค่าสุทธิ</p>
+        <div class="simpleTableWrap" style="margin-top:12px">
+          <table class="simpleTable">
+            <thead>
+              <tr><th>รหัส</th><th>ชื่อโครงการ</th><th>ผู้ดูแล</th><th>ทั้งหมด</th><th>รอรับ</th><th>เกิน SLA</th><th>มูลค่า</th></tr>
+            </thead>
+            <tbody id="ownerSummary"><tr><td colspan="7">ยังไม่มีข้อมูล</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card overdueCard" id="sec-overdue">
+      <div class="overdueTitle">
+        <div>
+          <h3>รายการต้องติดตาม / เกิน SLA</h3>
+          <p>เรียงจากล่าช้ามากที่สุด ใช้สำหรับติดตามฝ่ายจัดซื้อหรือผู้ดูแล</p>
+        </div>
+        <div class="actions">
+          <button class="btn light" onclick="copyOverdueDetail()">Copy รายการเกิน SLA</button>
+          <button class="btn" onclick="exportOverdueCsv()">Export เกิน SLA</button>
+        </div>
+      </div>
+      <div class="simpleTableWrap" style="margin-top:12px">
+        <table class="simpleTable">
+          <thead>
+            <tr>
+              <th>Recno</th><th>PO</th><th>บริษัท</th><th>รหัสโครงการ</th><th>ผู้ดูแล</th><th>Taxdate</th><th>ล่าช้า</th><th>สถานะ</th><th>มูลค่า</th>
+            </tr>
+          </thead>
+          <tbody id="overdueTable"><tr><td colspan="9">ยังไม่มีข้อมูล</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="mainListHeader">
+        <div>
+          <h3 class="sectionTitleClean">รายการเอกสารตัดรับ</h3>
+          <p class="sectionDescClean">ค้นหา ตรวจสอบสถานะ และเปิด Action ผ่านปุ่ม ...</p>
+        </div>
+      </div>
+
+      <!-- Auto bar — แสดงเฉพาะ tab รอตั้งหนี้ -->
+      <div id="autoBar" style="display:none;background:linear-gradient(135deg,#f0f9ff,#fdf4ff);border:1px solid #e0e7ff;border-radius:18px;padding:14px 16px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:700;color:#5b3fc2">
+          <input type="checkbox" id="checkAll" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;cursor:pointer">
+          เลือกทั้งหมด
+        </label>
+        <span id="selectedCount" style="font-size:13px;color:#728197">— ยังไม่ได้เลือก</span>
+        <div style="flex:1"></div>
+        <button class="btn" id="btnRunAuto" onclick="runAutoInvoice()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;opacity:.5;cursor:not-allowed" disabled>
+          ▶ Run Auto ตั้งหนี้ (0)
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <input class="search" id="search" placeholder="ค้นหา recno, PO, บริษัท..." oninput="renderAll()">
+        <div class="filters">
+          <select id="monthFilter" onchange="renderAll()"><option value="">ทุกเดือน</option></select>
+          <select id="projectFilter" onchange="renderAll()"><option value="">ทุกโครงการ</option></select>
+          <select id="delayFilter" onchange="renderAll()">
+            <option value="">ทุก SLA</option>
+            <option value="in">ตามกำหนด</option>
+            <option value="over">เกิน SLA</option>
+            <option value="over30">มากกว่า 30 วัน</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tableWrap">
+        <table class="mainTable">
+          <thead>
+            <tr id="mainTableHead">
+              <th id="th-check" style="display:none;width:36px"></th>
+              <th>Recno</th>
+              <th>PO</th>
+              <th>บริษัท</th>
+              <th>Project</th>
+              <th>ผู้ดูแล</th>
+              <th>Taxdate</th>
+              <th>SLA</th>
+              <th>รับเอกสาร</th>
+              <th>ตั้งหนี้</th>
+              <th style="text-align:right">มูลค่า</th>
+              <th style="text-align:center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"><tr><td colspan="12">ยังไม่มีข้อมูล</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid2" id="sec-logs">
+      <div class="card">
+        <h3>Import Logs</h3>
+        <p class="muted">ประวัติการ Import Excel จาก Python</p>
+        <div class="simpleTableWrap" style="margin-top:12px">
+          <table class="simpleTable">
+            <thead><tr><th>วันที่</th><th>ไฟล์</th><th>ทั้งหมด</th><th>สำเร็จ</th><th>ผิดพลาด</th></tr></thead>
+            <tbody id="importLogsTable"><tr><td colspan="5">ยังไม่ได้โหลด</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>เคล็ดลับใช้งาน</h3>
+        <p class="muted">แนวทางใช้งานประจำวัน</p>
+        <div class="helper" style="margin-top:12px;line-height:1.8">
+          1) กด Refresh ทุกครั้งก่อนเริ่มงาน<br>
+          2) ตรวจรายการ “เกิน SLA” ก่อน<br>
+          3) รับเอกสารแล้วค่อยเปลี่ยนสถานะ<br>
+          4) ก่อนเคลียร์ข้อมูล ให้ Backup ก่อนเสมอ
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<dialog id="detailDialog"><div class="modal">
+  <h3>รายละเอียดเอกสาร</h3>
+  <div id="detailContent"></div>
+  <div class="modalActions">
+    <button class="btn light" onclick="closeDetail()">ปิด</button>
+  </div>
+</div></dialog>
+
+<dialog id="editDialog"><div class="modal">
+  <h3>แก้ไขข้อมูล</h3>
+  <div class="modalGrid">
+    <div><label>บริษัท</label><input id="editCustName"></div>
+    <div><label>Project / refcode</label><input id="editRefcode"></div>
+    <div><label>Recno</label><input id="editRecno"></div>
+    <div><label>PO No</label><input id="editPono"></div>
+    <div><label>Taxdate</label><input id="editTaxdate" type="date"></div>
+    <div><label>Tax No</label><input id="editTaxno"></div>
+    <div><label>ผู้ดูแล</label><input id="editOwner"></div>
+    <div><label>มูลค่าสุทธิ</label><input id="editNet" type="number" step="0.01"></div>
+  </div>
+  <label>หมายเหตุ</label>
+  <textarea id="editRemark" rows="3"></textarea>
+  <div class="modalActions">
+    <button class="btn light" onclick="closeEdit()">ยกเลิก</button>
+    <button class="btn" onclick="saveEdit()">บันทึกแก้ไข</button>
+  </div>
+</div></dialog>
+
+<dialog id="invoiceDialog"><div class="modal">
+  <h3>ตั้งหนี้ Manual</h3>
+  <p id="invoiceInfo"></p>
+  <div class="modalGrid">
+    <div><label>วันที่ตั้งหนี้</label><input id="invoiceDate" type="date"></div>
+    <div><label>เลข Voucher <span style="color:var(--muted);font-weight:400">(ถ้ามี)</span></label><input id="invoiceVoucher" placeholder="เช่น AP2506-001"></div>
+  </div>
+  <label>หมายเหตุ</label>
+  <textarea id="invoiceRemark" rows="3"></textarea>
+  <div class="modalActions">
+    <button class="btn light" onclick="closeInvoiceDialog()">ยกเลิก</button>
+    <button class="btn" onclick="confirmInvoice()">บันทึกตั้งหนี้แล้ว</button>
+  </div>
+</div></dialog>
+
+<dialog id="clearDialog"><div class="modal">
+  <h3>เคลียร์ข้อมูลเก่า</h3>
+  <p style="color:#be123c">ควร Backup ก่อนทุกครั้ง เพราะการลบข้อมูลจะลบออกจาก Supabase จริง</p>
+  <div class="modalGrid">
+    <div>
+      <label>เลือกปีที่ต้องการเคลียร์</label>
+      <select id="clearYear" onchange="updateClearPreview()"></select>
+    </div>
+    <div>
+      <label>พิมพ์ DELETE เพื่อยืนยัน</label>
+      <input id="clearConfirmText" placeholder="DELETE">
+    </div>
+  </div>
+  <div id="clearPreview" class="notice">กรุณาเลือกปีที่ต้องการล้างข้อมูล</div>
+  <div class="modalActions">
+    <button class="btn light" onclick="closeClearDialog()">ยกเลิก</button>
+    <button class="btn" onclick="exportBackup()">Backup ก่อน</button>
+    <button class="btn red" onclick="clearSelectedYear()">ลบข้อมูลปีที่เลือก</button>
+  </div>
+</div></dialog>
+
+<script>
+let allRows=[], allProjects=[], projectMap={}, currentTab='all', currentInvoiceId=null, currentDetailId=null, currentEditId=null;
+
+function showMsg(t,ok=false){
+  const m=document.getElementById('msg');
+  m.textContent=t;
+  m.className=ok?'notice ok':'notice';
+}
+// ค่า default ฝังไว้ในไฟล์ — Viewer ทุกคนโหลดข้อมูลได้ทันทีโดยไม่ต้องกรอก
+const DEFAULT_URL = 'https://ivnmrnajdpltdaogyfhm.supabase.co';
+const DEFAULT_KEY = 'sb_publishable_NIpGViv8-nbxvUaCCpdALA_vt50MxYf';
+
+function getConfig(){
+  return{
+    url:localStorage.getItem('APV_SUPABASE_URL')||DEFAULT_URL,
+    key:localStorage.getItem('APV_SUPABASE_KEY')||DEFAULT_KEY,
+    apvUrl:localStorage.getItem('APV_FLOW_URL')||''
+  }
+}
+function setInputs(){
+  const c=getConfig();
+  supabaseUrl.value=c.url;
+  supabaseKey.value=c.key;
+  apvFlowUrl.value=c.apvUrl;
+}
+function saveConfigAndLoad(){
+  const u=supabaseUrl.value.trim().replace(/\/$/,'');
+  const k=supabaseKey.value.trim();
+  if(!u||!k) return showMsg('กรุณาใส่ URL และ key');
+  localStorage.setItem('APV_SUPABASE_URL',u);
+  localStorage.setItem('APV_SUPABASE_KEY',k);
+  const apvU=apvFlowUrl.value.trim();
+  if(apvU) localStorage.setItem('APV_FLOW_URL',apvU);
+  loadData();
+}
+function headers(){
+  const c=getConfig();
+  return {
+    'apikey':c.key,
+    'Authorization':'Bearer '+c.key,
+    'Content-Type':'application/json',
+    'Prefer':'return=representation'
+  };
+}
+async function loadData(){
+  const c=getConfig();
+  if(!c.url||!c.key) return showMsg('กรุณาใส่ Supabase URL และ key');
+  showMsg('กำลังโหลดข้อมูล...');
+  try{
+    // โหลด ap_projects ก่อน เพื่อสร้าง lookup refcode→owner/name
+    const rp=await fetch(`${c.url}/rest/v1/ap_projects?select=*`,{headers:headers()});
+    if(rp.ok){
+      allProjects=JSON.parse(await rp.text());
+      projectMap={};
+      allProjects.forEach(p=>{ if(p.refcode) projectMap[p.refcode]=p; });
+    }
+    // โหลดเอกสาร
+    const r=await fetch(`${c.url}/rest/v1/ap_documents?select=*&order=taxdate.desc.nullslast&limit=5000`,{headers:headers()});
+    const t=await r.text();
+    if(!r.ok) return showMsg('โหลดข้อมูลไม่สำเร็จ: '+t);
+    allRows=JSON.parse(t);
+    // Auto-fill + คำนวณ SLA ใหม่ทุก row
+    const todayStr=today();
+    allRows.forEach(row=>{
+      // HO auto-fill
+      if(!row.refcode) row.refcode='HO';
+      if(!row.owner_name && projectMap[row.refcode]){
+        row.owner_name=projectMap[row.refcode].pic||'';
+      }
+      // คำนวณ SLA due date ใหม่: วันที่ 7 เดือนถัดจาก taxdate
+      const sla=calcSlaDate(row.taxdate, row.duedate);
+      if(sla){
+        row.sla_due_date=sla;
+        // ถ้ารับแล้ว ใช้ receive_date เป็น reference; ยังไม่รับ ใช้วันนี้
+        const ref = row.receive_date || todayStr;
+        row.delay_days=calc(sla, ref);
+        row.delay_level=getLevel(row.delay_days);
+      }
+    });
+    buildFilters();
+    renderAll();
+    showMsg('โหลดข้อมูลสำเร็จ '+allRows.length+' รายการ',true);
+  }catch(e){
+    showMsg('เชื่อมต่อไม่ได้: '+e.message);
+  }
+}
+function buildFilters(){
+  const mv=monthFilter.value, pv=projectFilter.value, by=backupYear.value;
+  const months=new Set(), projects=new Set(), years=new Set();
+  allRows.forEach(r=>{
+    const d=r.taxdate||r.duedate||r.created_at;
+    if(d){ months.add(String(d).slice(0,7)); years.add(String(d).slice(0,4)); }
+    if(r.refcode) projects.add(r.refcode);
+  });
+  monthFilter.innerHTML='<option value="">ทุกเดือน</option>';
+  [...months].sort().reverse().forEach(m=>monthFilter.innerHTML+=`<option value="${m}">${m}</option>`);
+  monthFilter.value=mv;
+
+  projectFilter.innerHTML='<option value="">ทุกโครงการ</option>';
+  [...projects].sort().forEach(p=>projectFilter.innerHTML+=`<option value="${p}">${p}</option>`);
+  projectFilter.value=pv;
+
+  backupYear.innerHTML='<option value="">ทุกปี</option>';
+  [...years].sort().reverse().forEach(y=>backupYear.innerHTML+=`<option value="${y}">${y}</option>`);
+  backupYear.value=by;
+}
+function setTab(tab,btn){
+  currentTab=tab;
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // ล้างช่องค้นหาเมื่อสลับ tab เพื่อให้ดึงข้อมูลเฉพาะ tab นั้น
+  if(search) search.value='';
+  updateLayout();
+  renderAll();
+}
+function show(id,v){ const e=document.getElementById(id); if(e) e.style.display=v?'':'none'; }
+function updateLayout(){
+  const isDash    = currentTab==='completed_invoice';
+  const isReceive = currentTab==='waiting_receive';
+  // รอรับเอกสาร: ทุก section เหมือนเดิม (รวม overdue)
+  // Dashboard: Analytics sections เฉพาะ
+  // รอตั้งหนี้: เฉพาะตารางรายการ
+  const isPending = currentTab==='pending_invoice';
+  show('sec-metrics',       isReceive);
+  show('sec-dash-metrics',  isDash);
+  show('sec-dash-grid',     isDash);
+  show('sec-sla-grid',      isReceive);
+  show('sec-overdue',       isReceive);
+  show('sec-logs',          isDash || isReceive);
+  // autoBar: แสดงเฉพาะ tab รอตั้งหนี้
+  const ab=document.getElementById('autoBar');
+  if(ab) ab.style.display=isPending?'flex':'none';
+}
+// SLA ใหม่: วันที่ 7 ของเดือนถัดจาก taxdate
+function calcSlaDate(taxdate, duedate){
+  const ref = taxdate || duedate;
+  if(!ref) return null;
+  try{
+    const d = new Date(ref+'T00:00:00');
+    const m = d.getMonth(); // 0-based
+    const y = d.getFullYear();
+    const nm = m===11 ? 0 : m+1;
+    const ny = m===11 ? y+1 : y;
+    return `${ny}-${String(nm+1).padStart(2,'0')}-07`;
+  }catch(e){ return null; }
+}
+function filt(){
+  const q=search.value.trim().toLowerCase();
+  const m=monthFilter.value;
+  const proj=projectFilter.value;
+  const dfilter=delayFilter.value;
+
+  return allRows.filter(r=>{
+    if(currentTab==='waiting_receive' && r.receive_status!=='รอรับเอกสาร') return false;
+    if(currentTab==='pending_invoice' && !['รอตั้งหนี้','รอตั้งหนี้ (Auto)','กำลังประมวลผล','ผิดพลาด'].includes(r.invoice_status)) return false;
+    if(currentTab==='completed_invoice' && r.invoice_status!=='ตั้งหนี้แล้ว') return false;
+
+    if(m && !String(r.taxdate||r.duedate||r.created_at||'').startsWith(m)) return false;
+    if(proj && (r.refcode||'')!==proj) return false;
+
+    const dd=Number(r.delay_days||0);
+    if(dfilter==='in' && dd>0) return false;
+    if(dfilter==='over' && dd<=0) return false;
+    if(dfilter==='over30' && dd<=30) return false;
+
+    if(q){
+      const text=[
+        r.recno,r.pono,r.cust_name,r.refcode,r.owner_name,r.taxno,r.invoice_status,r.receive_status
+      ].join(' ').toLowerCase();
+      if(!text.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function renderAll(){
+  summary();
+  renderSlaBars();
+  renderOwnerSummary();
+  renderOverdueTable();
+  renderDashboard();
+  renderTable();
+}
+function money(n){ return Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function badge(t,c){ return `<span class="badge ${c}">${t||'-'}</span>`; }
+function fmtDate(s){
+  if(!s) return '-';
+  const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return s;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+function delayBadge(r){
+  const d=Number(r.delay_days||0);
+  if(d<=0)  return `<span class="dl-ok">ตามกำหนด</span>`;
+  if(d<=7)  return `<span class="dl-1">${d} วัน</span>`;
+  if(d<=15) return `<span class="dl-2">${d} วัน</span>`;
+  if(d<=30) return `<span class="dl-3">${d} วัน</span>`;
+  return `<span class="dl-4">${d} วัน</span>`;
+}
+function summary(){
+  // ใช้ allRows (ไม่กรอง tab) เพื่อให้ตัวเลขถูกต้องเสมอ
+  const rows=allRows;
+  const total=rows.length;
+  const pendingInv=rows.filter(r=>['รอตั้งหนี้','รอตั้งหนี้ (Auto)','กำลังประมวลผล','ผิดพลาด'].includes(r.invoice_status)).length;
+  const over=rows.filter(r=>Number(r.delay_days||0)>0 && r.invoice_status!=='ตั้งหนี้แล้ว').length;
+  sumAll.textContent=total;
+  sumWaiting.textContent=rows.filter(r=>r.receive_status==='รอรับเอกสาร').length;
+  sumPendingInvoice.textContent=pendingInv;
+  sumOverSla.textContent=over;
+  sumNet.textContent=money(rows.reduce((s,r)=>s+Number(r.net_amount||0),0));
+  overRate.textContent=(total?Math.round(over*100/total):0)+'%';
+}
+function renderSlaBars(){
+  const rows=filt(), total=Math.max(rows.length,1);
+  const groups=[
+    ['ในกำหนด', rows.filter(r=>Number(r.delay_days||0)<=0).length, 'green'],
+    ['1-7 วัน', rows.filter(r=>Number(r.delay_days||0)>0 && Number(r.delay_days||0)<=7).length, 'yellow'],
+    ['8-15 วัน', rows.filter(r=>Number(r.delay_days||0)>7 && Number(r.delay_days||0)<=15).length, 'orange'],
+    ['16-30 วัน', rows.filter(r=>Number(r.delay_days||0)>15 && Number(r.delay_days||0)<=30).length, 'orange'],
+    ['มากกว่า 30 วัน', rows.filter(r=>Number(r.delay_days||0)>30).length, 'red'],
+  ];
+  slaBars.innerHTML=groups.map(g=>{
+    const pct=Math.round(g[1]*100/total);
+    return `<div class="barRow">
+      <div class="barLabel"><span>${g[0]}</span><span>${g[1]} รายการ (${pct}%)</span></div>
+      <div class="track"><div class="fill ${g[2]}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function renderOwnerSummary(){
+  const rows=filt(), map={};
+  rows.forEach(r=>{
+    const key=r.refcode||'HO';
+    if(!map[key]) map[key]={total:0,wait:0,over:0,net:0};
+    map[key].total++;
+    if(r.receive_status==='รอรับเอกสาร') map[key].wait++;
+    if(Number(r.delay_days||0)>0) map[key].over++;
+    map[key].net+=Number(r.net_amount||0);
+  });
+  const entries=Object.entries(map).sort((a,b)=>b[1].total-a[1].total);
+  ownerSummary.innerHTML=entries.length ? entries.map(([code,v])=>{
+    const pj=allProjects.find(p=>p.refcode===code);
+    const pjName=pj ? pj.project_name||'-' : (code==='HO'?'(ไม่มีรหัส)':'-');
+    const pic=pj ? pj.pic||'-' : '-';
+    return `<tr>
+      <td><b>${code}</b></td>
+      <td>${pjName}</td>
+      <td>${pic}</td>
+      <td>${v.total}</td>
+      <td>${v.wait}</td>
+      <td>${v.over}</td>
+      <td style="text-align:right">${money(v.net)}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7">ไม่มีข้อมูล</td></tr>';
+}
+/* ===== Dashboard Analytics (ตั้งหนี้แล้ว) ===== */
+function renderDashboard(){
+  if(currentTab!=='completed_invoice') return;
+  // กรอง ตั้งหนี้แล้ว ทั้งหมด (ไม่ใช้ filt() เพราะ filt() กรอง tab แล้ว)
+  const rows=allRows.filter(r=>r.invoice_status==='ตั้งหนี้แล้ว');
+  const m=document.getElementById('monthFilter').value;
+  const proj=document.getElementById('projectFilter').value;
+  const filtered=rows.filter(r=>{
+    if(m && !String(r.taxdate||r.duedate||r.created_at||'').startsWith(m)) return false;
+    if(proj && (r.refcode||'')!==proj) return false;
+    return true;
+  });
+
+  const total=filtered.length;
+  const net=filtered.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  const lateRows=filtered.filter(r=>Number(r.delay_days||0)>0);
+  const late=lateRows.length;
+  const onTime=total-late;
+  const avgDelay=late ? Math.round(lateRows.reduce((s,r)=>s+Number(r.delay_days||0),0)/late) : 0;
+  const projects=new Set(filtered.map(r=>r.refcode||'HO')).size;
+
+  setText('dTotal',total);
+  setText('dNet',money(net));
+  setText('dLate',late);
+  setText('dLateRate',total ? Math.round(late*100/total)+'% ของทั้งหมด' : '0%');
+  setText('dAvgDelay',avgDelay);
+  setText('dOnTime',onTime);
+  setText('dOnTimeRate',total ? Math.round(onTime*100/total)+'% ของทั้งหมด' : '0%');
+  setText('dProjects',projects);
+
+  renderDashSlaBars(filtered);
+  renderDashProjectTable(filtered);
+  renderDashSupplierTable(filtered);
+}
+function setText(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
+
+function renderDashSlaBars(rows){
+  const total=Math.max(rows.length,1);
+  const groups=[
+    ['ตามกำหนด', rows.filter(r=>Number(r.delay_days||0)<=0).length,'green'],
+    ['1-7 วัน',  rows.filter(r=>Number(r.delay_days||0)>0&&Number(r.delay_days||0)<=7).length,'yellow'],
+    ['8-15 วัน', rows.filter(r=>Number(r.delay_days||0)>7&&Number(r.delay_days||0)<=15).length,'orange'],
+    ['16-30 วัน',rows.filter(r=>Number(r.delay_days||0)>15&&Number(r.delay_days||0)<=30).length,'orange'],
+    ['>30 วัน',  rows.filter(r=>Number(r.delay_days||0)>30).length,'red'],
+  ];
+  const el=document.getElementById('dashSlaBars');
+  if(!el) return;
+  el.innerHTML=groups.map(g=>{
+    const pct=Math.round(g[1]*100/total);
+    return `<div class="barRow">
+      <div class="barLabel"><span>${g[0]}</span><span>${g[1]} รายการ (${pct}%)</span></div>
+      <div class="track"><div class="fill ${g[2]}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderDashProjectTable(rows){
+  const map={};
+  rows.forEach(r=>{
+    const k=r.refcode||'HO';
+    if(!map[k]) map[k]={total:0,late:0,net:0};
+    map[k].total++;
+    if(Number(r.delay_days||0)>0) map[k].late++;
+    map[k].net+=Number(r.net_amount||0);
+  });
+  const entries=Object.entries(map).sort((a,b)=>b[1].late-a[1].late);
+  const el=document.getElementById('dashProjectTable');
+  if(!el) return;
+  el.innerHTML=entries.length ? entries.map(([code,v])=>{
+    const pj=allProjects.find(p=>p.refcode===code);
+    const pjName=pj?pj.project_name||'-':'(ไม่มีรหัส)';
+    const pic=pj?pj.pic||'-':'-';
+    const pct=v.total?Math.round(v.late*100/v.total):0;
+    const lateCls=pct>=50?'color:#be123c;font-weight:700':pct>=20?'color:#b45309;font-weight:700':'';
+    return `<tr>
+      <td><b>${code}</b></td><td>${pjName}</td><td>${pic}</td>
+      <td>${v.total}</td>
+      <td style="${lateCls}">${v.late}</td>
+      <td style="${lateCls}">${pct}%</td>
+      <td style="text-align:right">${money(v.net)}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7">ไม่มีข้อมูล</td></tr>';
+}
+
+function renderDashSupplierTable(rows){
+  const map={};
+  rows.forEach(r=>{
+    const k=r.cust_name||'-';
+    if(!map[k]) map[k]={total:0,late:0,net:0,maxDelay:0,totalDelay:0};
+    map[k].total++;
+    const d=Number(r.delay_days||0);
+    if(d>0){
+      map[k].late++;
+      map[k].totalDelay+=d;
+      if(d>map[k].maxDelay) map[k].maxDelay=d;
+    }
+    map[k].net+=Number(r.net_amount||0);
+  });
+  const entries=Object.entries(map)
+    .sort((a,b)=>b[1].late-a[1].late||b[1].total-a[1].total)
+    .slice(0,15);
+  const el=document.getElementById('dashSupplierTable');
+  if(!el) return;
+  el.innerHTML=entries.length ? entries.map(([name,v],i)=>{
+    const pct=v.total?Math.round(v.late*100/v.total):0;
+    const avg=v.late?Math.round(v.totalDelay/v.late):0;
+    const lateCls=pct>=50?'color:#be123c;font-weight:700':pct>=20?'color:#b45309':'';
+    const rankIcon=i<3&&v.late>0?['🔴','🟠','🟡'][i]+' ':''
+    return `<tr>
+      <td>${rankIcon}<b>${i+1}</b></td>
+      <td>${name}</td>
+      <td>${v.total}</td>
+      <td style="${lateCls}">${v.late}</td>
+      <td style="${lateCls}">${pct}%</td>
+      <td style="${avg>30?'color:#be123c;font-weight:700':avg>7?'color:#b45309':''}">${avg>0?avg+' วัน':'-'}</td>
+      <td style="${v.maxDelay>30?'color:#be123c':''}">${v.maxDelay>0?v.maxDelay+' วัน':'-'}</td>
+      <td style="text-align:right">${money(v.net)}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8">ไม่มีข้อมูล</td></tr>';
+}
+
+function getOverdueRows(){
+  return filt()
+    .filter(r=>Number(r.delay_days||0)>0 && r.invoice_status!=='ตั้งหนี้แล้ว')
+    .sort((a,b)=>Number(b.delay_days||0)-Number(a.delay_days||0));
+}
+function renderOverdueTable(){
+  const rows=getOverdueRows().slice(0,30);
+  overdueTable.innerHTML=rows.length ? rows.map(r=>`
+    <tr>
+      <td><b>${r.recno||'-'}</b></td>
+      <td>${r.pono||'-'}</td>
+      <td>${r.cust_name||'-'}</td>
+      <td>${r.refcode||'-'}</td>
+      <td>${r.owner_name||'-'}</td>
+      <td>${fmtDate(r.taxdate)}</td>
+      <td>${delayBadge(r)}</td>
+      <td>${r.receive_status||'-'} / ${r.invoice_status||'-'}</td>
+      <td style="text-align:right">${money(r.net_amount)}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="9">ไม่มีรายการเกิน SLA ตาม Filter ปัจจุบัน</td></tr>';
+}
+
+
+
+function renderTable(){
+  const rows=filt();
+  const isPending = currentTab==='pending_invoice';
+  const cols = isPending ? 13 : 12;  // เพิ่ม 1 col สำหรับ checkbox
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="${cols-1}">ไม่พบข้อมูล</td></tr>`;
+    return;
+  }
+  // แสดง/ซ่อน checkbox col
+  document.getElementById('th-check').style.display = isPending ? '' : 'none';
+
+  // Group by month for subtotal rows
+  let html='', curMonth='', monthNet=0, monthCount=0;
+  rows.forEach((r,idx)=>{
+    const mo=String(r.taxdate||r.duedate||'').slice(0,7);
+    if(mo!==curMonth){
+      if(curMonth){
+        const extraCol = isPending ? '<td></td>' : '';
+        html+=`<tr style="background:#f0f4ff">
+          ${extraCol}
+          <td colspan="9" style="font-size:12px;font-weight:700;color:#5b6473;padding:5px 10px">
+            รวม ${curMonth} (${monthCount} รายการ)
+          </td>
+          <td style="text-align:right;font-size:12px;font-weight:700;color:#3b4a63;padding:5px 10px">${money(monthNet)}</td>
+          <td></td>
+        </tr>`;
+      }
+      curMonth=mo; monthNet=0; monthCount=0;
+    }
+    monthNet+=Number(r.net_amount||0); monthCount++;
+    const receiveText=r.receive_status||'รอรับเอกสาร';
+    const invoiceText=r.invoice_status||'รอเอกสาร';
+    const checkCell = isPending
+      ? `<td style="text-align:center;width:36px"><input type="checkbox" class="rowCheck" data-id="${r.id}" onchange="updateRunBtn()" style="width:16px;height:16px;cursor:pointer"></td>`
+      : '';
+    html+=`<tr>
+      ${checkCell}
+      <td class="numCell"><div class="recMain">${r.recno||'-'}</div></td>
+      <td class="dateCell">${r.pono||'-'}</td>
+      <td class="company" title="${r.cust_name||''}">${r.cust_name||'-'}</td>
+      <td class="projectCell">${r.refcode||'-'}</td>
+      <td class="projectCell">${r.owner_name||'-'}</td>
+      <td class="dateCell">${fmtDate(r.taxdate)}</td>
+      <td class="centerCell">${delayBadge(r)}</td>
+      <td class="centerCell">${receiveText}</td>
+      <td class="centerCell">${invoiceText}</td>
+      <td class="moneyCell">${money(r.net_amount)}</td>
+      <td class="centerCell"><button class="actionDots" onclick="openDetail('${r.id}')">...</button></td>
+    </tr>`;
+  });
+  // ผลรวมเดือนสุดท้าย
+  if(curMonth){
+    const extraCol = isPending ? '<td></td>' : '';
+    html+=`<tr style="background:#f0f4ff">
+      ${extraCol}
+      <td colspan="10" style="font-size:12px;font-weight:700;color:#5b6473;padding:5px 10px">
+        รวม ${curMonth} (${monthCount} รายการ)
+      </td>
+      <td style="text-align:right;font-size:12px;font-weight:700;color:#3b4a63;padding:5px 10px">${money(monthNet)}</td>
+      <td></td>
+    </tr>`;
+  }
+  tbody.innerHTML=html;
+}
+function today(){
+  const d=new Date(), tz=d.getTimezoneOffset()*60000;
+  return new Date(d-tz).toISOString().slice(0,10);
+}
+function getLevel(n){
+  if(n<=0) return 'ตามกำหนด';
+  if(n<=7) return '1-7 วัน';
+  if(n<=15) return '8-15 วัน';
+  if(n<=30) return '16-30 วัน';
+  return 'มากกว่า 30 วัน';
+}
+function calc(s,r){
+  if(!s) return 0;
+  return Math.round((new Date(r+'T00:00:00')-new Date(s+'T00:00:00'))/86400000);
+}
+async function patch(id,p){
+  const c=getConfig();
+  const r=await fetch(`${c.url}/rest/v1/ap_documents?id=eq.${id}`,{
+    method:'PATCH', headers:headers(), body:JSON.stringify(p)
+  });
+  const t=await r.text();
+  if(!r.ok) throw Error(t);
+}
+async function markReceived(id){
+  const row=allRows.find(x=>x.id===id);
+  if(!confirm('รับเอกสาร Recno '+row.recno+' ?')) return;
+  const rd=today(), sla=row.sla_due_date||row.taxdate||row.duedate, d=calc(sla,rd);
+  const p={receive_status:'รับเอกสารแล้ว', receive_date:rd, invoice_status:'รอตั้งหนี้', delay_days:d, delay_level:getLevel(d)};
+  try{
+    await patch(id,p); Object.assign(row,p); renderAll(); showMsg('รับเอกสารสำเร็จ '+row.recno,true);
+  }catch(e){ showMsg('รับเอกสารไม่สำเร็จ: '+e.message); }
+}
+async function undoReceive(id){
+  const r=allRows.find(x=>x.id===id);
+  if(!confirm('ย้อนสถานะรับเอกสารของ '+r.recno+' ?')) return;
+  const p={receive_status:'รอรับเอกสาร',receive_date:null,invoice_status:'รอเอกสาร',invoice_check:false,invoice_date:null};
+  try{
+    await patch(id,p); Object.assign(r,p); renderAll(); showMsg('ย้อนรับเอกสารแล้ว '+r.recno,true);
+  }catch(e){ showMsg('ย้อนรับไม่สำเร็จ: '+e.message); }
+}
+async function undoInvoice(id){
+  const r=allRows.find(x=>x.id===id);
+  if(!confirm('ย้อนสถานะตั้งหนี้ของ '+r.recno+' ?')) return;
+  const p={invoice_status:'รอตั้งหนี้',invoice_check:false,invoice_date:null};
+  try{
+    await patch(id,p); Object.assign(r,p); renderAll(); showMsg('ย้อนตั้งหนี้แล้ว '+r.recno,true);
+  }catch(e){ showMsg('ย้อนตั้งหนี้ไม่สำเร็จ: '+e.message); }
+}
+function box(k,v,span){ return `<div class="detailBox${span?' '+span:''}" ><span>${k}</span><b>${v??'-'}</b></div>`; }
+
+
+function openDetail(id){
+  currentDetailId=id;
+  const r=allRows.find(x=>x.id===id);
+
+  const canReceive=r.receive_status!=='รับเอกสารแล้ว';
+  const canInvoice=r.receive_status==='รับเอกสารแล้ว' && r.invoice_status!=='ตั้งหนี้แล้ว';
+  const canUndoReceive=r.receive_status==='รับเอกสารแล้ว';
+  const canUndoInvoice=r.invoice_status==='ตั้งหนี้แล้ว';
+
+  const actionButtons = isAdminMode ? `
+    <div class="detailActionsBox">
+      <h4>Action</h4>
+      <div class="detailActionButtons">
+        ${canReceive ? `<button class="btn small p-green" onclick="closeDetail(); markReceived('${r.id}')">✔ รับเอกสาร</button>` : ''}
+        ${canInvoice ? `<button class="btn small p-purple" onclick="closeDetail(); openInvoiceDialog('${r.id}')">🧾 ตั้งหนี้</button>` : ''}
+        <button class="btn small p-blue" onclick="closeDetail(); openEdit('${r.id}')">✏ แก้ไข</button>
+        ${canUndoReceive ? `<button class="btn small p-orange" onclick="closeDetail(); undoReceive('${r.id}')">↩ ย้อนรับ</button>` : ''}
+        ${canUndoInvoice ? `<button class="btn small p-orange" onclick="closeDetail(); undoInvoice('${r.id}')">↩ ย้อนตั้งหนี้</button>` : ''}
+      </div>
+    </div>
+  ` : `<div style="padding:12px;border-radius:18px;background:#fff8e1;color:#795548;font-size:13px;text-align:center">👁 โหมดดูอย่างเดียว — ไม่สามารถแก้ไขได้</div>`;
+
+  detailContent.innerHTML=`<div class="detailGrid">
+    ${box('Recno',r.recno)}${box('PO',r.pono)}${box('บริษัท',r.cust_name)}
+    ${box('Project',r.refcode)}${box('ผู้ดูแล',r.owner_name)}${box('SLA Due',fmtDate(r.sla_due_date))}
+    ${box('Taxdate',fmtDate(r.taxdate))}${box('Tax No',r.taxno)}${box('Due Date',fmtDate(r.duedate))}
+    ${box('ก่อน VAT',money(r.amount_before_vat))}${box('VAT',money(r.vat_amount))}${box('มูลค่าสุทธิ',money(r.net_amount))}
+    ${box('วันล่าช้า',r.delay_days ? r.delay_days+' วัน' : 'ตามกำหนด')}${box('ระดับ SLA',r.delay_level,'span-2')}
+    ${box('รับเอกสาร',r.receive_status)}${box('วันที่รับ',fmtDate(r.receive_date),'span-2')}
+    ${box('ตั้งหนี้',r.invoice_status)}${box('วันที่ตั้งหนี้',fmtDate(r.invoice_date))}${box('Voucher',r.voucher_no||'-')}
+    ${box('หมายเหตุ',r.remark||'-','span-full')}
+  </div>${actionButtons}`;
+  detailDialog.showModal();
+}
+function closeDetail(){ detailDialog.close(); }
+function openEditFromDetail(){ closeDetail(); openEdit(currentDetailId); }
+function openEdit(id){
+  currentEditId=id;
+  const r=allRows.find(x=>x.id===id);
+  editCustName.value=r.cust_name||'';
+  editRefcode.value=r.refcode||'';
+  editRecno.value=r.recno||'';
+  editPono.value=r.pono||'';
+  editTaxdate.value=r.taxdate||'';
+  editTaxno.value=r.taxno||'';
+  editOwner.value=r.owner_name||'';
+  editNet.value=r.net_amount||0;
+  editRemark.value=r.remark||'';
+  editDialog.showModal();
+}
+function closeEdit(){ editDialog.close(); currentEditId=null; }
+async function saveEdit(){
+  const r=allRows.find(x=>x.id===currentEditId);
+  const p={
+    cust_name:editCustName.value.trim()||null,
+    refcode:editRefcode.value.trim()||null,
+    recno:editRecno.value.trim()||null,
+    pono:editPono.value.trim()||null,
+    taxdate:editTaxdate.value||null,
+    taxno:editTaxno.value.trim()||null,
+    owner_name:editOwner.value.trim()||null,
+    net_amount:Number(editNet.value||0),
+    remark:editRemark.value.trim()||null
+  };
+  try{
+    await patch(currentEditId,p);
+    Object.assign(r,p);
+    closeEdit();
+    buildFilters();
+    renderAll();
+    showMsg('แก้ไขข้อมูลสำเร็จ',true);
+  }catch(e){ showMsg('แก้ไขข้อมูลไม่สำเร็จ: '+e.message); }
+}
+function openInvoiceDialog(id){
+  currentInvoiceId=id;
+  const r=allRows.find(x=>x.id===id);
+  invoiceInfo.textContent=`Recno: ${r.recno} | PO: ${r.pono||'-'} | ${r.cust_name||'-'}`;
+  invoiceDate.value=r.invoice_date||today();
+  invoiceVoucher.value=r.voucher_no||'';
+  invoiceRemark.value=r.remark||'';
+  invoiceDialog.showModal();
+}
+function closeInvoiceDialog(){ invoiceDialog.close(); currentInvoiceId=null; }
+async function confirmInvoice(){
+  const r=allRows.find(x=>x.id===currentInvoiceId);
+  const p={
+    invoice_check:false,        // Manual ตั้งหนี้ → ไม่ต้องให้ Runner ประมวลผลซ้ำ
+    invoice_status:'ตั้งหนี้แล้ว',
+    invoice_date:invoiceDate.value||today(),
+    voucher_no:invoiceVoucher.value.trim()||null,
+    remark:invoiceRemark.value.trim()||r.remark||null
+  };
+  try{
+    await patch(currentInvoiceId,p);
+    Object.assign(r,p);
+    closeInvoiceDialog();
+    // Switch ไป Dashboard เพื่อดูรายการที่ตั้งหนี้แล้ว
+    const dashBtn=document.querySelector('.nav button:first-child');
+    setTab('completed_invoice', dashBtn);
+    showMsg('✅ ตั้งหนี้แล้ว '+r.recno+' — ดูได้ที่ Dashboard',true);
+  }catch(e){ showMsg('บันทึกไม่ได้: '+e.message); }
+}
+async function loadImportLogs(){
+  const c=getConfig();
+  if(!c.url||!c.key) return showMsg('กรุณาใส่ Supabase URL และ key');
+  try{
+    const r=await fetch(`${c.url}/rest/v1/import_logs?select=*&order=import_date.desc&limit=20`,{headers:headers()});
+    const t=await r.text();
+    if(!r.ok){ importLogsTable.innerHTML=`<tr><td colspan="5">${t}</td></tr>`; return; }
+    const logs=JSON.parse(t);
+    importLogsTable.innerHTML=logs.length ? logs.map(l=>`
+      <tr>
+        <td>${String(l.import_date||'').replace('T',' ').slice(0,19)}</td>
+        <td>${l.file_name||'-'}</td>
+        <td>${l.total_rows??0}</td>
+        <td>${l.success_rows??0}</td>
+        <td>${l.failed_rows??0}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="5">ยังไม่มี Import Log</td></tr>';
+    showMsg('โหลด Import Logs สำเร็จ',true);
+  }catch(e){ showMsg('โหลด Import Logs ไม่สำเร็จ: '+e.message); }
+}
+function downloadCsv(rows, cols, filename){
+  const csv=[cols.join(','), ...rows.map(r=>cols.map(c=>`"${String(r[c]??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:'text/csv'}));
+  a.download=filename;
+  a.click();
+}
+function exportCsv(){
+  const rows=filt();
+  const cols=['cust_name','refcode','recno','duedate','pono','amount_before_vat','vat_amount','net_amount','taxdate','taxno','owner_name','receive_status','receive_date','sla_due_date','delay_days','delay_level','invoice_status','invoice_date','remark'];
+  downloadCsv(rows,cols,'apv_flow_export.csv');
+}
+function exportBackup(){
+  const y=backupYear.value;
+  const rows=allRows.filter(r=>{
+    if(!y) return true;
+    return String(r.taxdate||r.duedate||r.created_at||'').startsWith(y);
+  });
+  if(!rows.length) return showMsg('ไม่มีข้อมูลสำหรับ Backup');
+  const cols=['id','cust_name','refcode','recno','duedate','pono','amount_before_vat','vat_amount','net_amount','taxdate','taxno','owner_name','receive_status','receive_date','sla_due_date','delay_days','delay_level','invoice_check','invoice_status','voucher_no','invoice_date','remark','import_file_name','is_archived','created_at','updated_at'];
+  const stamp=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  downloadCsv(rows,cols,`apv_flow_backup_${y||'all'}_${stamp}.csv`);
+  showMsg(`Backup ${y||'ทั้งหมด'} สำเร็จ ${rows.length} รายการ`,true);
+}
+function parseCsvLine(line){
+  let out=[], cur='', inQ=false;
+  for(let i=0;i<line.length;i++){
+    let ch=line[i], nx=line[i+1];
+    if(ch==='"' && inQ && nx==='"'){ cur+='"'; i++; continue; }
+    if(ch==='"'){ inQ=!inQ; continue; }
+    if(ch===',' && !inQ){ out.push(cur); cur=''; continue; }
+    cur+=ch;
+  }
+  out.push(cur); return out;
+}
+function previewRestoreCsv(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const text=reader.result.replace(/^\ufeff/,'');
+    const lines=text.split(/\r?\n/).filter(x=>x.trim());
+    if(lines.length<2){
+      restorePreview.style.display='block';
+      restorePreview.textContent='ไฟล์ CSV ไม่มีข้อมูล';
+      return;
+    }
+    const headersCsv=parseCsvLine(lines[0]);
+    const count=lines.length-1;
+    restorePreview.style.display='block';
+    restorePreview.innerHTML=`พบไฟล์ <b>${file.name}</b><br>จำนวนข้อมูลประมาณ <b>${count}</b> แถว<br>คอลัมน์: ${headersCsv.slice(0,8).join(', ')}...<br><br><button class="btn" onclick="restoreCsvData()">Restore เข้า Supabase</button>`;
+    window._restoreCsvText=text;
+  };
+  reader.readAsText(file,'utf-8');
+}
+async function restoreCsvData(){
+  if(!confirm('ยืนยัน Restore CSV เข้า Supabase?')) return;
+  const text=window._restoreCsvText;
+  if(!text) return showMsg('ยังไม่มีไฟล์ Restore');
+  const lines=text.split(/\r?\n/).filter(x=>x.trim());
+  const heads=parseCsvLine(lines[0]);
+  const rows=lines.slice(1).map(line=>{
+    const vals=parseCsvLine(line), obj={};
+    heads.forEach((h,i)=>{ obj[h]=vals[i]===''?null:vals[i]; });
+    delete obj.id; delete obj.created_at; delete obj.updated_at;
+    ['amount_before_vat','vat_amount','net_amount'].forEach(k=>{ if(obj[k]!=null) obj[k]=Number(obj[k]||0); });
+    if(obj.delay_days!=null) obj.delay_days=Number(obj.delay_days||0);
+    ['invoice_check','is_archived'].forEach(k=>{ if(obj[k]!=null) obj[k]=String(obj[k]).toLowerCase()==='true'; });
+    return obj;
+  });
+  const c=getConfig(), url=`${c.url}/rest/v1/ap_documents?on_conflict=recno,pono`;
+  let ok=0, fail=0, chunk=100;
+  for(let i=0;i<rows.length;i+=chunk){
+    const part=rows.slice(i,i+chunk);
+    const h=headers(); h['Prefer']='resolution=ignore-duplicates,return=minimal';
+    const r=await fetch(url,{method:'POST',headers:h,body:JSON.stringify(part)});
+    if(r.ok) ok+=part.length; else fail+=part.length;
+  }
+  showMsg(`Restore เสร็จ: ส่งเข้า ${ok} แถว, ผิดพลาด ${fail} แถว`,fail===0);
+  loadData();
+}
+function buildClearYearOptions(){
+  const years=new Set();
+  allRows.forEach(r=>{
+    const d=String(r.taxdate||r.duedate||r.created_at||'');
+    if(d) years.add(d.slice(0,4));
+  });
+  clearYear.innerHTML='<option value="">เลือกปีที่ต้องการล้าง</option>';
+  [...years].sort().reverse().forEach(y=>clearYear.innerHTML+=`<option value="${y}">${y}</option>`);
+}
+function getRowsForClear(){
+  const y=clearYear.value;
+  if(!y) return [];
+  return allRows.filter(r=>String(r.taxdate||r.duedate||r.created_at||'').startsWith(y));
+}
+function updateClearPreview(){
+  const rows=getRowsForClear();
+  const net=rows.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  clearPreview.innerHTML=rows.length
+    ? `ปี ${clearYear.value}: พบ <b>${rows.length}</b> รายการ มูลค่าสุทธิ <b>${money(net)}</b><br>กรุณา Backup ก่อนลบ`
+    : 'กรุณาเลือกปีที่ต้องการล้างข้อมูล';
+}
+function openClearDialog(){
+  buildClearYearOptions();
+  updateClearPreview();
+  clearDialog.showModal();
+}
+function closeClearDialog(){
+  clearDialog.close();
+  clearConfirmText.value='';
+}
+async function clearSelectedYear(){
+  const y=clearYear.value;
+  if(!y) return showMsg('กรุณาเลือกปีที่ต้องการเคลียร์');
+  const rows=getRowsForClear();
+  if(!rows.length) return showMsg('ไม่มีข้อมูลสำหรับเคลียร์');
+  if(clearConfirmText.value.trim()!=='DELETE') return showMsg('กรุณาพิมพ์ DELETE เพื่อยืนยันการลบ');
+  if(!confirm(`ยืนยันลบข้อมูลปี ${y} จำนวน ${rows.length} รายการ?`)) return;
+  const c=getConfig();
+  const start=`${y}-01-01`;
+  const end=`${Number(y)+1}-01-01`;
+  const url=`${c.url}/rest/v1/ap_documents?taxdate=gte.${start}&taxdate=lt.${end}`;
+  try{
+    const res=await fetch(url,{method:'DELETE',headers:headers()});
+    const text=await res.text();
+    if(!res.ok) throw Error(text);
+    closeClearDialog();
+    showMsg(`เคลียร์ข้อมูลปี ${y} สำเร็จ ${rows.length} รายการ`,true);
+    loadData();
+  }catch(e){ showMsg('เคลียร์ข้อมูลไม่สำเร็จ: '+e.message); }
+}
+function lineSummaryText(){
+  const rows=filt();
+  const total=rows.length;
+  const waiting=rows.filter(r=>r.receive_status==='รอรับเอกสาร').length;
+  const received=rows.filter(r=>r.receive_status==='รับเอกสารแล้ว').length;
+  const pendingInv=rows.filter(r=>r.invoice_status==='รอตั้งหนี้').length;
+  const completed=rows.filter(r=>r.invoice_status==='ตั้งหนี้แล้ว').length;
+  const over=rows.filter(r=>Number(r.delay_days||0)>0).length;
+  const over30=rows.filter(r=>Number(r.delay_days||0)>30).length;
+  const net=rows.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  const month=monthFilter.value||'ทุกเดือน';
+  const proj=projectFilter.value||'ทุกโครงการ';
+  return [
+    '📌 สรุป APV Flow',
+    `เดือน: ${month}`,
+    `โครงการ: ${proj}`,
+    '',
+    `รายการทั้งหมด: ${total} รายการ`,
+    `รอรับเอกสาร: ${waiting} รายการ`,
+    `รับเอกสารแล้ว: ${received} รายการ`,
+    `รอตั้งหนี้: ${pendingInv} รายการ`,
+    `ตั้งหนี้แล้ว: ${completed} รายการ`,
+    `เกิน SLA: ${over} รายการ`,
+    `เกิน 30 วัน: ${over30} รายการ`,
+    `มูลค่าสุทธิรวม: ฿${money(net)}`,
+    '',
+    'กรุณาติดตามรายการที่เกิน SLA'
+  ].join('\n');
+}
+function overdueDetailText(){
+  const rows=getOverdueRows().slice(0,20);
+  if(!rows.length) return 'ไม่มีรายการเกิน SLA ตาม Filter ปัจจุบัน';
+  let lines=['🚨 รายการเอกสารเกิน SLA ต้องติดตาม',''];
+  rows.forEach((r,i)=>{
+    lines.push(`${i+1}. Recno: ${r.recno||'-'}`);
+    lines.push(`   PO: ${r.pono||'-'}`);
+    lines.push(`   บริษัท: ${r.cust_name||'-'}`);
+    lines.push(`   ผู้ดูแล: ${r.owner_name||'-'}`);
+    lines.push(`   ล่าช้า: ${Number(r.delay_days||0)} วัน`);
+    lines.push(`   สถานะ: ${r.receive_status||'-'} / ${r.invoice_status||'-'}`);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+async function copyText(text,successMsg){
+  try{
+    await navigator.clipboard.writeText(text);
+    showMsg(successMsg,true);
+  }catch(e){
+    showMsg('Copy ไม่สำเร็จ: '+e.message);
+    alert(text);
+  }
+}
+function copyLineSummary(){ copyText(lineSummaryText(),'Copy ข้อความสรุป LINE แล้ว'); }
+function copyOverdueDetail(){ copyText(overdueDetailText(),'Copy รายการเกิน SLA แล้ว'); }
+function exportOverdueCsv(){
+  const rows=getOverdueRows();
+  const cols=['cust_name','refcode','recno','duedate','pono','net_amount','taxdate','taxno','owner_name','receive_status','receive_date','sla_due_date','delay_days','delay_level','invoice_status','invoice_date','remark'];
+  downloadCsv(rows,cols,'apv_flow_overdue_sla.csv');
+}
+
+
+function closeAllRowMenus(){
+  document.querySelectorAll('.rowMenu').forEach(m=>m.classList.remove('open'));
+}
+function toggleRowMenu(event,id){
+  event.stopPropagation();
+  const target=document.getElementById(id);
+  const isOpen=target.classList.contains('open');
+  closeAllRowMenus();
+  if(!isOpen) target.classList.add('open');
+}
+document.addEventListener('click', ()=>closeAllRowMenus());
+
+// ==================== Automation Functions ====================
+
+function getCheckedIds(){
+  return [...document.querySelectorAll('.rowCheck:checked')].map(cb=>cb.dataset.id);
+}
+function toggleSelectAll(checked){
+  document.querySelectorAll('.rowCheck').forEach(cb=>cb.checked=checked);
+  updateRunBtn();
+}
+function updateRunBtn(){
+  const ids=getCheckedIds();
+  const btn=document.getElementById('btnRunAuto');
+  const cnt=document.getElementById('selectedCount');
+  if(!btn) return;
+  if(ids.length){
+    btn.textContent=`▶ Run Auto ตั้งหนี้ (${ids.length})`;
+    btn.disabled=false;
+    btn.style.opacity='1';
+    btn.style.cursor='pointer';
+    cnt.textContent=`เลือก ${ids.length} รายการ`;
+  }else{
+    btn.textContent='▶ Run Auto ตั้งหนี้ (0)';
+    btn.disabled=true;
+    btn.style.opacity='.5';
+    btn.style.cursor='not-allowed';
+    cnt.textContent='— ยังไม่ได้เลือก';
+  }
+  // sync select-all checkbox
+  const allCbs=document.querySelectorAll('.rowCheck');
+  const chkAll=document.getElementById('checkAll');
+  if(chkAll) chkAll.checked=allCbs.length>0&&ids.length===allCbs.length;
+}
+
+async function runAutoInvoice(){
+  const ids=getCheckedIds();
+  if(!ids.length) return showMsg('กรุณาเลือกรายการก่อน');
+  const recs=ids.map(id=>{const r=allRows.find(x=>x.id===id); return r?r.recno:id;}).join(', ');
+  if(!confirm(`ส่งให้ Python Runner ตั้งหนี้ ${ids.length} รายการ?\n${recs}`)) return;
+
+  const c=getConfig();
+  if(!c.url||!c.key) return showMsg('กรุณาใส่ Supabase URL และ key ก่อน');
+  const btn=document.getElementById('btnRunAuto');
+  btn.disabled=true; btn.textContent='⏳ กำลังส่ง...';
+
+  try{
+    // PATCH invoice_check=true สำหรับ rows ที่เลือก
+    let ok=0, fail=0;
+    for(const id of ids){
+      try{
+        await patch(id,{invoice_check:true, invoice_status:'รอตั้งหนี้ (Auto)'});
+        const r=allRows.find(x=>x.id===id);
+        if(r){ r.invoice_check=true; r.invoice_status='รอตั้งหนี้ (Auto)'; }
+        ok++;
+      }catch(e){ fail++; }
+    }
+    renderAll();
+    if(fail===0){
+      showMsg(`✅ ส่งคิวให้ Python Runner ${ok} รายการแล้ว — รอ Runner ประมวลผล (≤30 วินาที)`,true);
+    }else{
+      showMsg(`ส่งสำเร็จ ${ok} รายการ / ผิดพลาด ${fail} รายการ`);
+    }
+  }catch(e){
+    showMsg('เกิดข้อผิดพลาด: '+e.message);
+  }finally{
+    updateRunBtn();
+  }
+}
+
+async function fetchMango(){
+  const c=getConfig();
+  if(!c.url||!c.key) return showMsg('กรุณาใส่ Supabase URL และ key ก่อน');
+  if(!confirm('สั่งให้ Python Runner ดึงรายงานตัดรับจาก Mango ใช่ไหม?\n(Python Runner ต้องรันอยู่บนเครื่องก่อน)')) return;
+
+  const btn=document.getElementById('btnFetchMango');
+  const orig=btn.textContent;
+  btn.disabled=true; btn.textContent='⏳ กำลังส่ง signal...';
+
+  try{
+    const r=await fetch(`${c.url}/rest/v1/app_signals`,{
+      method:'POST',
+      headers:{...headers(),'Prefer':'return=minimal'},
+      body:JSON.stringify({type:'fetch',created_by:'web_app',status:'pending'})
+    });
+    if(!r.ok){
+      const t=await r.text();
+      throw Error(t);
+    }
+    showMsg('✅ ส่ง Fetch Signal แล้ว — Python Runner จะดึงรายงานจาก Mango ใน 30 วินาที',true);
+  }catch(e){
+    showMsg('ส่ง Signal ไม่สำเร็จ: '+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent=orig;
+  }
+}
+
+// ==================== LINE Notification ====================
+
+function todayTH(){
+  const d=new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()+543}`;
+}
+
+async function sendLineSignal(signalType, message){
+  const c=getConfig();
+  const r=await fetch(`${c.url}/rest/v1/app_signals`,{
+    method:'POST',
+    headers:{...headers(),'Prefer':'return=minimal'},
+    body:JSON.stringify({type:signalType, created_by:'web_app', status:'pending', result:message})
+  });
+  if(!r.ok) throw Error(await r.text());
+}
+
+async function sendLineDailySummary(){
+  const c=getConfig();
+  if(!c.url||!c.key) return showMsg('กรุณาใส่ Supabase URL และ key ก่อน');
+
+  const btn=document.getElementById('btnLineSummary');
+  btn.disabled=true; btn.textContent='⏳ กำลังส่ง...';
+
+  const td=new Date().toISOString().slice(0,10);
+  const th=todayTH();
+
+  // --- helper: แปลง YYYY-MM เป็นชื่อเดือน ไทย ---
+  function monthTH(ym){
+    if(!ym) return '-';
+    const [y,m]=ym.split('-');
+    const names=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return `${names[Number(m)]} ${Number(y)+543}`;
+  }
+
+  // --- helper: จัดกลุ่มตามเดือน → ภายในแต่ละเดือน จัดกลุ่มตามบริษัท ---
+  function buildMonthBlocks(rows, keyFn){
+    // keyFn(r) คืน label สำหรับแต่ละ item เช่น recno หรือ voucher_no
+    const byMonth = {};
+    rows.forEach(r=>{
+      const ym = String(r.taxdate||r.duedate||'').slice(0,7) || 'ไม่ระบุ';
+      if(!byMonth[ym]) byMonth[ym]={rows:[]};
+      byMonth[ym].rows.push(r);
+    });
+    const divider = '─────────────────';
+    const blocks = [];
+    Object.entries(byMonth).sort(([a],[b])=>a.localeCompare(b)).forEach(([ym,{rows:mRows}])=>{
+      // จัดกลุ่มตามบริษัทภายในเดือน
+      const byComp = {};
+      mRows.forEach(r=>{
+        const co=r.cust_name||'-';
+        if(!byComp[co]) byComp[co]={items:[],amount:0};
+        byComp[co].items.push(keyFn(r));
+        byComp[co].amount+=Number(r.net_amount||0);
+      });
+      const monthTotal = mRows.reduce((s,r)=>s+Number(r.net_amount||0),0);
+      const compLines = Object.entries(byComp)
+        .map(([co,d])=>`🏢 ${co}\n${d.items.map(x=>'  • '+x).join('\n')}\n  💲 ${money(d.amount)} บาท (${d.items.length} ฉบับ)`)
+        .join('\n');
+      blocks.push(
+        `📆 ${monthTH(ym)}  (${mRows.length} รายการ / ${money(monthTotal)} บาท)\n`+
+        compLines
+      );
+    });
+    return blocks.join('\n'+divider+'\n');
+  }
+
+  // --- ข้อมูลสำหรับ LINE จัดซื้อ ---
+  const received  = allRows.filter(r=>r.receive_date===td && r.receive_status==='รับเอกสารแล้ว');
+  const recTotal  = received.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  const purchaseMonths = new Set(received.map(r=>String(r.taxdate||'').slice(0,7))).size;
+  const now=new Date();
+  const updateTime=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const msgPurchase =
+    `🗂 สรุปการรับเอกสารประจำวัน\n`+
+    `📅 ${th}\n\n`+
+    `✅ รับแล้ว ${received.length} รายการ`+(purchaseMonths>1?` (${purchaseMonths} เดือน)`:'')+`\n`+
+    `💰 มูลค่ารวม ${money(recTotal)} บาท\n\n`+
+    (received.length ? buildMonthBlocks(received, r=>{
+      const d=Number(r.delay_days||0);
+      return (r.recno||'-') + (d>0 ? `  ⚠️ SLA +${d} D.` : '');
+    })+'\n\n' : '')+
+    `⏰ อัปเดต: ${updateTime} น.`;
+
+  // --- ข้อมูลสำหรับ LINE บัญชี ---
+  const invoiced   = allRows.filter(r=>r.invoice_date===td && r.invoice_status==='ตั้งหนี้แล้ว');
+  const invTotal   = invoiced.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  const pendingInv = allRows.filter(r=>r.invoice_status==='รอตั้งหนี้').length;
+  const acctMonths = new Set(invoiced.map(r=>String(r.taxdate||'').slice(0,7))).size;
+
+  const msgAccounting =
+    `🧾 สรุปการตั้งหนี้ประจำวัน\n`+
+    `📅 ${th}\n\n`+
+    `✅ ตั้งหนี้แล้ว ${invoiced.length} รายการ`+(acctMonths>1?` (${acctMonths} เดือน)`:'')+`\n`+
+    `💰 มูลค่ารวม ${money(invTotal)} บาท\n\n`+
+    (invoiced.length ? buildMonthBlocks(invoiced, r=>r.voucher_no||r.recno||'-')+'\n\n' : '')+
+    `🕐 รอตั้งหนี้คงค้าง: ${pendingInv} รายการ\n`+
+    `⏰ อัปเดต: ${updateTime} น.`;
+
+  const hasPurchaseData   = received.length > 0;
+  const hasAccountingData = invoiced.length > 0;
+
+  if(!hasPurchaseData && !hasAccountingData){
+    showMsg('ไม่มีรายการวันนี้ — ไม่ส่ง LINE',true);
+    btn.disabled=false; btn.textContent='📋 ส่งสรุปรายวัน LINE';
+    return;
+  }
+
+  try{
+    const signals=[];
+    if(hasPurchaseData)   signals.push(sendLineSignal('line_purchase_daily',   msgPurchase));
+    if(hasAccountingData) signals.push(sendLineSignal('line_accounting_daily', msgAccounting));
+    await Promise.all(signals);
+    const dest = [hasPurchaseData?'จัดซื้อ':null, hasAccountingData?'บัญชี':null].filter(Boolean).join(' + ');
+    showMsg(`✅ ส่งสรุปรายวัน LINE แล้ว — ${dest} (Python Runner จะส่งใน ≤30 วินาที)`,true);
+  }catch(e){
+    showMsg('ส่ง Signal ไม่สำเร็จ: '+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent='📋 ส่งสรุปรายวัน LINE';
+  }
+}
+
+// ===================== DAILY REPORT =====================
+function buildLinePreview(rows, mode, theme){
+  // theme: 'green'|'blue'|'amber'  (default: green)
+  const themeClass = 'lp-'+(theme||'green');
+  // จัด group เหมือน LINE: แยกเดือน → แยก บริษัท
+  const byMonth = {};
+  rows.forEach(r=>{
+    const ym = String(r.taxdate||r.invoice_date||'').slice(0,7)||'ไม่ระบุ';
+    if(!byMonth[ym]) byMonth[ym]=[];
+    byMonth[ym].push(r);
+  });
+  const monthNames=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const fmtMon = ym => {
+    if(ym==='ไม่ระบุ') return ym;
+    const [y,m]=ym.split('-');
+    return `${monthNames[Number(m)]} ${Number(y)+543}`;
+  };
+  let html = `<div class="linePreviewWrap ${themeClass}">`;
+  const sortedMonths = Object.keys(byMonth).sort();
+  sortedMonths.forEach((ym,mi)=>{
+    const mRows = byMonth[ym];
+    const mTotal = mRows.reduce((s,r)=>s+Number(r.net_amount||0),0);
+    // group by company
+    const byComp = {};
+    mRows.forEach(r=>{
+      const co=r.cust_name||'-';
+      if(!byComp[co]) byComp[co]=[];
+      byComp[co].push(r);
+    });
+    if(mi>0) html += '<div class="lpDivider">─────────────────</div>';
+    html += `<div class="lpMonth">📆 ${fmtMon(ym)} &nbsp;<span class="lpMonthSub">${mRows.length} รายการ / ${money(mTotal)} บาท</span></div>`;
+    Object.entries(byComp).forEach(([co,cRows])=>{
+      const cTotal = cRows.reduce((s,r)=>s+Number(r.net_amount||0),0);
+      html += `<div class="lpComp">🏢 ${co}</div>`;
+      cRows.forEach(r=>{
+        let label = '';
+        if(mode==='purchase'){
+          const d=Number(r.delay_days||0);
+          label = `<span class="lpRecno">${r.recno||'-'}</span>`;
+          if(d>0) label += ` <span class="lpSla">⚠️ SLA +${d} D.</span>`;
+        } else {
+          label = `<span class="lpVoucher">${r.voucher_no||r.recno||'-'}</span>`;
+        }
+        html += `<div class="lpItem">• ${label} <span class="lpAmt">${money(r.net_amount)} บาท</span></div>`;
+      });
+      html += `<div class="lpCompTotal">💲 ${money(cTotal)} บาท (${cRows.length} ฉบับ)</div>`;
+    });
+  });
+  html += '</div>';
+  return html;
+}
+
+function openDailyReport(){
+  document.getElementById('rptDateInput').value = today();
+  renderDailyReport();
+  document.getElementById('reportDialog').showModal();
+}
+
+function renderDailyReport(){
+  const d = document.getElementById('rptDateInput').value || today();
+  // แปลงวันที่เป็น ไทย
+  const thDate = (()=>{
+    const m=d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(!m) return d;
+    const months=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return `${Number(m[3])} ${months[Number(m[2])]} ${Number(m[1])+543}`;
+  })();
+  document.getElementById('rptDateLabel').textContent = `วันที่ ${thDate}  •  สร้างเมื่อ ${new Date().toLocaleTimeString('th-TH')} น.`;
+
+  const received  = allRows.filter(r=>r.receive_date===d && r.receive_status==='รับเอกสารแล้ว');
+  const invoiced  = allRows.filter(r=>r.invoice_date===d && r.invoice_status==='ตั้งหนี้แล้ว');
+  const pending   = allRows.filter(r=>['รอตั้งหนี้','รอตั้งหนี้ (Auto)'].includes(r.invoice_status));
+  const overdue   = allRows.filter(r=>Number(r.delay_days||0)>0 && r.invoice_status!=='ตั้งหนี้แล้ว');
+  const waiting   = allRows.filter(r=>r.receive_status==='รอรับเอกสาร');
+
+  const sumAmt = arr => arr.reduce((s,r)=>s+Number(r.net_amount||0),0);
+
+  // KPI cards (3 cards)
+  document.getElementById('rptKpiRow').innerHTML = `
+    <div class="rptKpi" style="background:#eafaf0;border-color:#a7f3d0">
+      <div class="rk-val" style="color:#17603b">${received.length}</div>
+      <div class="rk-lbl" style="color:#17603b">รับเอกสารวันนี้</div>
+      <div class="rk-sub" style="color:#17603b">${money(sumAmt(received))} บาท</div>
+    </div>
+    <div class="rptKpi" style="background:#e5f3ff;border-color:#93c5fd">
+      <div class="rk-val" style="color:#0369a1">${invoiced.length}</div>
+      <div class="rk-lbl" style="color:#0369a1">ตั้งหนี้วันนี้</div>
+      <div class="rk-sub" style="color:#0369a1">${money(sumAmt(invoiced))} บาท</div>
+    </div>
+    <div class="rptKpi" style="background:#fff6dc;border-color:#fcd34d">
+      <div class="rk-val" style="color:#9a6800">${pending.length}</div>
+      <div class="rk-lbl" style="color:#9a6800">รอตั้งหนี้คงค้าง</div>
+      <div class="rk-sub" style="color:#9a6800">${money(sumAmt(pending))} บาท</div>
+    </div>`;
+
+  // ─── ตารางรับเอกสาร (แบบ LINE) ───
+  document.getElementById('rptSecReceive').innerHTML = `
+    <h4 class="green">✅ รับเอกสารวันนี้ — ${received.length} รายการ  (${money(sumAmt(received))} บาท)</h4>
+    ${received.length ? buildLinePreview(received,'purchase','green') : '<div class="rptEmpty">ไม่มีการรับเอกสารวันนี้</div>'}`;
+
+  // ─── ตารางตั้งหนี้ (แบบ LINE) ───
+  document.getElementById('rptSecInvoice').innerHTML = `
+    <h4 class="blue">🧾 ตั้งหนี้วันนี้ — ${invoiced.length} รายการ  (${money(sumAmt(invoiced))} บาท)</h4>
+    ${invoiced.length ? buildLinePreview(invoiced,'accounting','blue') : '<div class="rptEmpty">ไม่มีการตั้งหนี้วันนี้</div>'}`;
+
+  // ─── รอตั้งหนี้คงค้าง (แบบ LINE เหมือนกัน) ───
+  document.getElementById('rptSecPending').innerHTML = `
+    <h4 class="orange">⏳ รอตั้งหนี้คงค้าง — ${pending.length} รายการ  (${money(sumAmt(pending))} บาท)</h4>
+    ${pending.length ? buildLinePreview(pending,'purchase','amber') : '<div class="rptEmpty">ไม่มีรายการรอตั้งหนี้</div>'}`;
+
+  document.getElementById('rptSecOverdue').innerHTML = '';
+}
+
+function printReport(){ window.print(); }
+
+function copyReportText(){
+  const d = document.getElementById('rptDateInput').value || today();
+  const received = allRows.filter(r=>r.receive_date===d && r.receive_status==='รับเอกสารแล้ว');
+  const invoiced  = allRows.filter(r=>r.invoice_date===d && r.invoice_status==='ตั้งหนี้แล้ว');
+  const pending   = allRows.filter(r=>['รอตั้งหนี้','รอตั้งหนี้ (Auto)'].includes(r.invoice_status));
+  const overdue   = allRows.filter(r=>Number(r.delay_days||0)>0 && r.invoice_status!=='ตั้งหนี้แล้ว');
+  const sumAmt = arr=>arr.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  const thDate=(()=>{const m=d.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return d;const mo=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];return `${Number(m[3])} ${mo[Number(m[2])]} ${Number(m[1])+543}`;})();
+  let txt = `📊 รายงานประจำวัน — ${thDate}\n`;
+  txt += `${'═'.repeat(40)}\n`;
+  txt += `✅ รับเอกสาร: ${received.length} รายการ  (${money(sumAmt(received))} บาท)\n`;
+  if(received.length) received.forEach(r=>{ txt+=`   • ${r.recno||'-'}  ${r.cust_name||'-'}  ${money(r.net_amount)} บาท\n`; });
+  txt += `\n🧾 ตั้งหนี้: ${invoiced.length} รายการ  (${money(sumAmt(invoiced))} บาท)\n`;
+  if(invoiced.length) invoiced.forEach(r=>{ txt+=`   • ${r.recno||'-'}  ${r.cust_name||'-'}  Voucher: ${r.voucher_no||'-'}  ${money(r.net_amount)} บาท\n`; });
+  txt += `\n⏳ รอตั้งหนี้คงค้าง: ${pending.length} รายการ  (${money(sumAmt(pending))} บาท)\n`;
+  txt += `🚨 เกิน SLA: ${overdue.length} รายการ\n`;
+  txt += `${'═'.repeat(40)}\n`;
+  txt += `สร้างจาก APV Flow — ${new Date().toLocaleString('th-TH')} น.`;
+  navigator.clipboard.writeText(txt).then(()=>showMsg('คัดลอกรายงานแล้ว ✅',true)).catch(()=>showMsg('คัดลอกไม่สำเร็จ'));
+}
+
+function exportDailyReport(){
+  const d = document.getElementById('rptDateInput').value || today();
+  const received = allRows.filter(r=>r.receive_date===d && r.receive_status==='รับเอกสารแล้ว');
+  const invoiced  = allRows.filter(r=>r.invoice_date===d && r.invoice_status==='ตั้งหนี้แล้ว');
+  const pending   = allRows.filter(r=>['รอตั้งหนี้','รอตั้งหนี้ (Auto)'].includes(r.invoice_status));
+  const thDate=(()=>{const m=d.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return d;const mo=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];return `${Number(m[3])} ${mo[Number(m[2])]} ${Number(m[1])+543}`;})();
+  const BOM = '﻿';
+  const toCSV = (header, rows) => [header, ...rows].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+
+  // sheet 1: รับเอกสาร
+  let csv = BOM;
+  csv += `รายงานประจำวัน — ${thDate}\n\n`;
+  csv += `=== รับเอกสารวันนี้ ===\n`;
+  csv += toCSV(['Recno','PO','บริษัท','Project','ผู้ดูแล','Taxdate','SLA Due','วันล่าช้า','ระดับ SLA','ก่อน VAT','VAT','มูลค่าสุทธิ','หมายเหตุ'],
+    received.map(r=>[r.recno,r.pono,r.cust_name,r.refcode,r.owner_name,r.taxdate,r.sla_due_date,r.delay_days,r.delay_level,r.amount_before_vat,r.vat_amount,r.net_amount,r.remark]));
+  csv += `\n\n=== ตั้งหนี้วันนี้ ===\n`;
+  csv += toCSV(['Recno','PO','บริษัท','Project','ผู้ดูแล','Taxdate','วันที่ตั้งหนี้','Voucher','ก่อน VAT','VAT','มูลค่าสุทธิ','หมายเหตุ'],
+    invoiced.map(r=>[r.recno,r.pono,r.cust_name,r.refcode,r.owner_name,r.taxdate,r.invoice_date,r.voucher_no,r.amount_before_vat,r.vat_amount,r.net_amount,r.remark]));
+  csv += `\n\n=== รอตั้งหนี้คงค้าง ===\n`;
+  csv += toCSV(['Recno','PO','บริษัท','Project','ผู้ดูแล','วันที่รับ','Taxdate','SLA Due','วันล่าช้า','ระดับ SLA','มูลค่าสุทธิ','สถานะ'],
+    pending.map(r=>[r.recno,r.pono,r.cust_name,r.refcode,r.owner_name,r.receive_date,r.taxdate,r.sla_due_date,r.delay_days,r.delay_level,r.net_amount,r.invoice_status]));
+
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `APV_Report_${d}.csv`;
+  a.click();
+  showMsg('Export สำเร็จ ✅',true);
+}
+
+// ===================== LOGIN / ACCESS CONTROL =====================
+let currentUser = '';
+let isAdminMode = false;
+
+function getAdmins(){
+  try{ return JSON.parse(localStorage.getItem('APV_ADMINS')||'[]'); }
+  catch(e){ return []; }
+}
+function saveAdmins(arr){ localStorage.setItem('APV_ADMINS', JSON.stringify(arr)); }
+function checkIsAdmin(name){
+  if(!name) return false;
+  return getAdmins().map(n=>n.trim().toLowerCase()).includes(name.trim().toLowerCase());
+}
+
+function doLogin(){
+  const name = document.getElementById('loginName').value.trim();
+  currentUser = name;
+  isAdminMode = checkIsAdmin(name);
+  if(name) localStorage.setItem('APV_USERNAME', name);
+  document.getElementById('loginDialog').close();
+  applyAccessControl();
+  setInputs();
+  if(getConfig().url && getConfig().key) loadData();
+}
+
+function doLogout(){
+  localStorage.removeItem('APV_USERNAME');
+  currentUser=''; isAdminMode=false;
+  document.getElementById('loginName').value='';
+  applyAccessControl();
+  document.getElementById('loginDialog').showModal();
+}
+
+function applyAccessControl(){
+  // Admin-only elements
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    el.style.display = isAdminMode ? '' : 'none';
+  });
+  // Admin management section: แสดงเสมอถ้ายังไม่มี Admin, หรือถ้าเป็น Admin
+  const noAdminYet = getAdmins().length === 0;
+  const sec = document.getElementById('sec-adminMgr');
+  if(sec) sec.style.display = (isAdminMode || noAdminYet) ? '' : 'none';
+  // Viewer badge
+  document.getElementById('viewerBadge').style.display = isAdminMode ? 'none' : '';
+  // User card
+  document.getElementById('ucName').textContent = currentUser || '(ไม่ระบุชื่อ)';
+  document.getElementById('ucRole').textContent = isAdminMode ? '🔑 Admin — แก้ไขได้' : '👁 Viewer — ดูอย่างเดียว';
+  // Admin list display
+  renderAdminList();
+}
+
+function renderAdminList(){
+  const el=document.getElementById('adminList');
+  if(!el) return;
+  const admins=getAdmins();
+  if(!admins.length){
+    el.innerHTML='<span style="color:#e85d04;font-size:13px;font-weight:700">⚠️ ยังไม่มี Admin — พิมพ์ชื่อแล้วกด "+ เพิ่ม" เพื่อกำหนดสิทธิ์</span>';
+    return;
+  }
+  el.innerHTML = admins.map((n,i)=>`
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#ede9fe;color:#5b3fc2;font-size:13px;font-weight:700">
+      👤 ${n}
+      <button onclick="removeAdmin(${i})" style="background:none;border:0;color:#be123c;cursor:pointer;font-size:14px;line-height:1">×</button>
+    </span>`).join('');
+}
+
+function addAdmin(){
+  const input=document.getElementById('newAdminName');
+  const name=input.value.trim();
+  if(!name) return;
+  const arr=getAdmins();
+  if(!arr.map(n=>n.toLowerCase()).includes(name.toLowerCase())) arr.push(name);
+  saveAdmins(arr);
+  input.value='';
+  renderAdminList();
+}
+
+function removeAdmin(idx){
+  const arr=getAdmins();
+  arr.splice(idx,1);
+  saveAdmins(arr);
+  renderAdminList();
+}
+
+// Allow pressing Enter in login input
+document.getElementById('loginName').addEventListener('keydown',function(e){
+  if(e.key==='Enter') doLogin();
+});
+
+// ===================== INIT =====================
+setInputs();
+currentTab='completed_invoice';
+updateLayout();
+
+// Check saved user
+const savedUser = localStorage.getItem('APV_USERNAME')||'';
+if(savedUser){
+  currentUser = savedUser;
+  isAdminMode = checkIsAdmin(savedUser);
+  applyAccessControl();
+  if(getConfig().url && getConfig().key) loadData();
+} else {
+  applyAccessControl();
+  document.getElementById('loginDialog').showModal();
+}
+</script>
+
+<!-- Daily Report Dialog -->
+<dialog id="reportDialog">
+  <div class="modal">
+    <div class="rptHeader">
+      <div>
+        <h3 class="rptTitle">📊 รายงานประจำวัน</h3>
+        <div class="rptDate" id="rptDateLabel"></div>
+      </div>
+      <div class="rptActions">
+        <button class="btn light" onclick="printReport()">🖨 พิมพ์</button>
+        <button class="btn light" onclick="copyReportText()">📋 คัดลอก</button>
+        <button class="btn p-teal" onclick="exportDailyReport()">📥 Export Excel</button>
+        <button class="btn light" onclick="document.getElementById('reportDialog').close()">✕ ปิด</button>
+      </div>
+    </div>
+
+    <!-- Date picker -->
+    <div class="rptDatePicker">
+      <label>📅 เลือกวันที่</label>
+      <input type="date" id="rptDateInput" onchange="renderDailyReport()">
+    </div>
+
+    <!-- KPI summary -->
+    <div class="rptSummaryGrid" id="rptKpiRow"></div>
+
+    <!-- รับเอกสารวันนี้ -->
+    <div class="rptSection" id="rptSecReceive"></div>
+
+    <!-- ตั้งหนี้วันนี้ -->
+    <div class="rptSection" id="rptSecInvoice"></div>
+
+    <!-- ยังรอตั้งหนี้ -->
+    <div class="rptSection" id="rptSecPending"></div>
+
+    <!-- เกิน SLA -->
+    <div class="rptSection" id="rptSecOverdue"></div>
+
+    <div class="modalActions">
+      <button class="btn light" onclick="document.getElementById('reportDialog').close()">ปิด</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Login Dialog -->
+<dialog id="loginDialog">
+  <div class="loginBox">
+    <div class="loginLogo">APV</div>
+    <h2>APV Flow</h2>
+    <p>กรุณาใส่ชื่อของคุณเพื่อเข้าใช้งาน</p>
+    <input id="loginName" class="loginInput" placeholder="ชื่อของคุณ..." autocomplete="off">
+    <button class="loginBtn" onclick="doLogin()">เข้าสู่ระบบ →</button>
+    <div class="viewerNotice">💡 ถ้าไม่ใส่ชื่อ หรือชื่อไม่อยู่ในรายการ Admin<br>จะเข้าได้แบบ <b>ดูอย่างเดียว</b> เท่านั้น</div>
+  </div>
+</dialog>
+
+</body>
+</html>
