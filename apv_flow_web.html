@@ -2715,4 +2715,46 @@ if(savedUser){
 </script>
 
 <!-- Daily Report Dialog -->
-<dialog id="repo
+<dialog id="reportDialog">
+  <div class="modal">
+    <div class="rptHeader">
+      <div>
+        <h3 class="rptTitle">📊 รายงานประจำวัน</h3>
+        <div class="rptDate" id="rptDateLabel"></div>
+      </div>
+      <div class="rptActions">
+        <button class="btn light" onclick="printReport()">🖨 พิมพ์</button>
+        <button class="btn light" onclick="copyReportText()">📋 คัดลอก</button>
+        <button class="btn p-teal" onclick="exportDailyReport()">📥 Export Excel</button>
+        <button class="btn light" onclick="document.getElementById('reportDialog').close()">✕ ปิด</button>
+      </div>
+    </div>
+    <div class="rptDatePicker">
+      <label>📅 เลือกวันที่</label>
+      <input type="date" id="rptDateInput" onchange="renderDailyReport()">
+    </div>
+    <div class="rptSummaryGrid" id="rptKpiRow"></div>
+    <div class="rptSection" id="rptSecReceive"></div>
+    <div class="rptSection" id="rptSecInvoice"></div>
+    <div class="rptSection" id="rptSecPending"></div>
+    <div class="rptSection" id="rptSecOverdue"></div>
+    <div class="modalActions">
+      <button class="btn light" onclick="document.getElementById('reportDialog').close()">ปิด</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Login Dialog -->
+<dialog id="loginDialog">
+  <div class="loginBox">
+    <div class="loginLogo">APV</div>
+    <h2>APV Flow</h2>
+    <p>กรุณาใส่ชื่อของคุณเพื่อเข้าใช้งาน</p>
+    <input id="loginName" class="loginInput" placeholder="ชื่อของคุณ..." autocomplete="off">
+    <button class="loginBtn" onclick="doLogin()">เข้าสู่ระบบ →</button>
+    <div class="viewerNotice">💡 ถ้าไม่ใส่ชื่อ หรือชื่อไม่อยู่ในรายการ Admin<br>จะเข้าได้แบบ <b>ดูอย่างเดียว</b> เท่านั้น</div>
+  </div>
+</dialog>
+
+</body>
+</html>
