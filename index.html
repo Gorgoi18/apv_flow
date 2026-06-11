@@ -1396,9 +1396,9 @@ function updateLayout(){
   // autoBar: แสดงเฉพาะ tab รอตั้งหนี้
   const ab=document.getElementById('autoBar');
   if(ab) ab.style.display=isPending?'flex':'none';
-  // receiveBar: แสดงเฉพาะ tab รอรับเอกสาร
+  // receiveBar: ซ่อนแล้ว (ใช้ detail popup แทน)
   const rb=document.getElementById('receiveBar');
-  if(rb) rb.style.display=isReceive?'flex':'none';
+  if(rb) rb.style.display='none';
 }
 // SLA ใหม่: วันที่ 7 ของเดือนถัดจาก taxdate
 function calcSlaDate(taxdate, duedate){
@@ -1669,8 +1669,7 @@ function renderOverdueTable(){
 function renderTable(){
   const rows=filt();
   const isPending = currentTab==='pending_invoice';
-  const isWaiting = currentTab==='waiting_receive';
-  const hasCheck  = isPending || isWaiting;
+  const hasCheck  = isPending;
   const cols = hasCheck ? 13 : 12;
   if(!rows.length){
     tbody.innerHTML=`<tr><td colspan="${cols-1}">ไม่พบข้อมูล</td></tr>`;
@@ -1685,7 +1684,7 @@ function renderTable(){
     const mo=String(r.taxdate||r.duedate||'').slice(0,7);
     if(mo!==curMonth){
       if(curMonth){
-        const extraCol = hasCheck ? '<td></td>' : '';
+        const extraCol = isPending ? '<td></td>' : '';
         html+=`<tr style="background:#f0f4ff">
           ${extraCol}
           <td colspan="9" style="font-size:12px;font-weight:700;color:#5b6473;padding:5px 10px">
@@ -1702,9 +1701,7 @@ function renderTable(){
     const invoiceText=r.invoice_status||'รอเอกสาร';
     const checkCell = isPending
       ? `<td style="text-align:center;width:36px"><input type="checkbox" class="rowCheck" data-id="${r.id}" onchange="updateRunBtn()" style="width:16px;height:16px;cursor:pointer"></td>`
-      : isWaiting
-        ? `<td style="text-align:center;width:36px"><input type="checkbox" class="rcvCheck" data-id="${r.id}" onchange="updateReceiveBtn()" style="width:16px;height:16px;cursor:pointer"></td>`
-        : '';
+      : '';
     html+=`<tr>
       ${checkCell}
       <td class="numCell"><div class="recMain">${r.recno||'-'}</div></td>
@@ -2753,4 +2750,4 @@ if(savedUser){
 </dialog>
 
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
