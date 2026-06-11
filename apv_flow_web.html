@@ -1232,7 +1232,7 @@ h3.sectionTitleClean{
   <h3>รับเอกสาร</h3>
   <p id="bulkReceiveInfo" style="font-size:13px;color:#444;margin-bottom:12px;line-height:1.7"></p>
   <div class="modalGrid">
-    <div><label>วันที่รับเอกสารจริง</label><input id="bulkReceiveDate" type="date"></div>
+    <div><label>วันที่รับเอกสารจริง (วว/ดด/ปปปป)</label><input id="bulkReceiveDate" type="text" placeholder="วว/ดด/ปปปป" maxlength="10" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px"></div>
   </div>
   <div class="modalActions">
     <button class="btn light" onclick="closeBulkReceiveDialog()">ยกเลิก</button>
@@ -1735,6 +1735,20 @@ function today(){
   const d=new Date(), tz=d.getTimezoneOffset()*60000;
   return new Date(d-tz).toISOString().slice(0,10);
 }
+// แปลง dd/mm/yyyy → yyyy-mm-dd
+function parseDMY(s){
+  if(!s) return '';
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!m) return s; // ถ้าไม่ match คืนค่าเดิม (อาจเป็น yyyy-mm-dd อยู่แล้ว)
+  return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+}
+// แปลง yyyy-mm-dd → dd/mm/yyyy
+function ymdToDMY(s){
+  if(!s) return '';
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return s;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
 function getLevel(n){
   if(n<=0) return 'ตามกำหนด';
   if(n<=7) return '1-7 วัน';
@@ -1783,7 +1797,7 @@ function _openReceiveDialog(ids){
   document.getElementById('bulkReceiveInfo').innerHTML=
     `เลือกไว้ <b>${rows.length} รายการ</b> · มูลค่ารวม <b>${money(totalNet)} บาท</b>`+
     `<br><span style="font-size:12px;color:#728197">${recnos}</span>`;
-  document.getElementById('bulkReceiveDate').value=today();
+  document.getElementById('bulkReceiveDate').value=ymdToDMY(today());
   document.getElementById('bulkReceiveDialog').showModal();
 }
 
@@ -1798,8 +1812,9 @@ function closeBulkReceiveDialog(){
 }
 
 async function confirmBulkReceive(){
-  const rd=document.getElementById('bulkReceiveDate').value;
-  if(!rd){ showMsg('กรุณาเลือกวันที่รับเอกสาร'); return; }
+  const raw=document.getElementById('bulkReceiveDate').value;
+  const rd=parseDMY(raw);
+  if(!rd){ showMsg('กรุณากรอกวันที่รับเอกสาร (วว/ดด/ปปปป)'); return; }
   const btn=document.getElementById('btnConfirmBulkReceive');
   if(btn){ btn.disabled=true; btn.textContent='กำลังบันทึก...'; }
   closeBulkReceiveDialog();
@@ -1821,7 +1836,8 @@ async function confirmBulkReceive(){
 
 // single-item receive จาก date input ในการ์ด
 async function markReceivedFromDetail(id){
-  const rd = document.getElementById('detailReceiveDate')?.value || today();
+  const raw = document.getElementById('detailReceiveDate')?.value || '';
+  const rd = parseDMY(raw) || today();
   const row = allRows.find(r=>r.id===id);
   if(!row) return;
   const sla = row.sla_due_date||row.taxdate||row.duedate;
@@ -1902,9 +1918,11 @@ function openDetail(id){
       lbl.style.cssText = 'font-size:12px;color:#728197;white-space:nowrap';
       lbl.textContent = 'วันที่รับจริง';
       const inp = document.createElement('input');
-      inp.type = 'date';
+      inp.type = 'text';
       inp.id = 'detailReceiveDate';
-      inp.value = todayVal;
+      inp.value = ymdToDMY(todayVal);
+      inp.placeholder = 'วว/ดด/ปปปป';
+      inp.maxLength = 10;
       inp.style.cssText = 'border:1px solid #d1d5db;border-radius:8px;padding:5px 10px;font-size:13px;flex:1;min-width:130px';
       wrap.appendChild(lbl);
       wrap.appendChild(inp);
@@ -2745,9 +2763,4 @@ if(savedUser){
     <p>กรุณาใส่ชื่อของคุณเพื่อเข้าใช้งาน</p>
     <input id="loginName" class="loginInput" placeholder="ชื่อของคุณ..." autocomplete="off">
     <button class="loginBtn" onclick="doLogin()">เข้าสู่ระบบ →</button>
-    <div class="viewerNotice">💡 ถ้าไม่ใส่ชื่อ หรือชื่อไม่อยู่ในรายการ Admin<br>จะเข้าได้แบบ <b>ดูอย่างเดียว</b> เท่านั้น</div>
-  </div>
-</dialog>
-
-</body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+    <div class="viewerNotice">💡 ถ้าไม่ใส่ชื่อ หรือชื่อไม่อยู่ในรายการ Admin<
