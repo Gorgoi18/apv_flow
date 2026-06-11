@@ -1869,14 +1869,10 @@ function openDetail(id){
   const canUndoInvoice=r.invoice_status==='ตั้งหนี้แล้ว';
 
   const todayVal = today();
-  const datePickerHtml = canReceive
-    ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><label style="font-size:12px;color:#728197;white-space:nowrap">วันที่รับจริง</label><input type="date" id="detailReceiveDate" value="' + todayVal + '" style="border:1px solid #d1d5db;border-radius:8px;padding:5px 10px;font-size:13px;flex:1;min-width:130px"></div>'
-    : '';
 
   const actionButtons = isAdminMode ? `
     <div class="detailActionsBox">
       <h4>Action</h4>
-      ${datePickerHtml}
       <div class="detailActionButtons">
         ${canReceive ? `<button class="btn small p-green" onclick="markReceivedFromDetail('${r.id}')">✔ รับเอกสาร</button>` : ''}
         ${canInvoice ? `<button class="btn small p-purple" onclick="closeDetail(); openInvoiceDialog('${r.id}')">🧾 ตั้งหนี้</button>` : ''}
@@ -2757,4 +2753,4 @@ if(savedUser){
 </dialog>
 
 </body>
-</html>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
