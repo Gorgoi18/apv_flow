@@ -1108,6 +1108,19 @@ h3.sectionTitleClean{
         </button>
       </div>
 
+      <!-- Receive bar — แสดงเฉพาะ tab รอรับเอกสาร -->
+      <div id="receiveBar" style="display:none;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #bbf7d0;border-radius:18px;padding:14px 16px;margin-bottom:14px;gap:10px;align-items:center;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:700;color:#065f46">
+          <input type="checkbox" id="checkAllReceive" onchange="toggleSelectAllReceive(this.checked)" style="width:16px;height:16px;cursor:pointer">
+          เลือกทั้งหมด
+        </label>
+        <span id="selectedReceiveCount" style="font-size:13px;color:#728197">— ยังไม่ได้เลือก</span>
+        <div style="flex:1"></div>
+        <button class="btn" id="btnBulkReceive" onclick="openBulkReceiveDialog()" style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;opacity:.5;cursor:not-allowed" disabled>
+          ✔ รับเอกสาร (0)
+        </button>
+      </div>
+
       <div class="toolbar">
         <input class="search" id="search" placeholder="ค้นหา recno, PO, บริษัท..." oninput="renderAll()">
         <div class="filters">
@@ -1215,6 +1228,18 @@ h3.sectionTitleClean{
   </div>
 </div></dialog>
 
+<dialog id="bulkReceiveDialog"><div class="modal">
+  <h3>รับเอกสาร</h3>
+  <p id="bulkReceiveInfo" style="font-size:13px;color:#444;margin-bottom:12px;line-height:1.7"></p>
+  <div class="modalGrid">
+    <div><label>วันที่รับเอกสารจริง</label><input id="bulkReceiveDate" type="date"></div>
+  </div>
+  <div class="modalActions">
+    <button class="btn light" onclick="closeBulkReceiveDialog()">ยกเลิก</button>
+    <button class="btn" id="btnConfirmBulkReceive" onclick="confirmBulkReceive()">ยืนยันรับเอกสาร</button>
+  </div>
+</div></dialog>
+
 <dialog id="clearDialog"><div class="modal">
   <h3>เคลียร์ข้อมูลเก่า</h3>
   <p style="color:#be123c">ควร Backup ก่อนทุกครั้ง เพราะการลบข้อมูลจะลบออกจาก Supabase จริง</p>
@@ -1309,8 +1334,11 @@ async function loadData(){
       const sla=calcSlaDate(row.taxdate, row.duedate);
       if(sla){
         row.sla_due_date=sla;
-        // ถ้ารับแล้ว ใช้ receive_date เป็น reference; ยังไม่รับ ใช้วันนี้
-        const ref = row.receive_date || todayStr;
+        // รับแล้ว → delay = receive_date − sla (วัดจากวันรับจริง)
+        // ยังไม่รับ → delay = วันนี้ − sla (แสดงว่าเกิน SLA กี่วันแล้ว)
+        const ref = (row.receive_status==='รับเอกสารแล้ว' && row.receive_date)
+          ? row.receive_date
+          : todayStr;
         row.delay_days=calc(sla, ref);
         row.delay_level=getLevel(row.delay_days);
       }
@@ -1368,6 +1396,9 @@ function updateLayout(){
   // autoBar: แสดงเฉพาะ tab รอตั้งหนี้
   const ab=document.getElementById('autoBar');
   if(ab) ab.style.display=isPending?'flex':'none';
+  // receiveBar: แสดงเฉพาะ tab รอรับเอกสาร
+  const rb=document.getElementById('receiveBar');
+  if(rb) rb.style.display=isReceive?'flex':'none';
 }
 // SLA ใหม่: วันที่ 7 ของเดือนถัดจาก taxdate
 function calcSlaDate(taxdate, duedate){
@@ -1638,13 +1669,15 @@ function renderOverdueTable(){
 function renderTable(){
   const rows=filt();
   const isPending = currentTab==='pending_invoice';
-  const cols = isPending ? 13 : 12;  // เพิ่ม 1 col สำหรับ checkbox
+  const isWaiting = currentTab==='waiting_receive';
+  const hasCheck  = isPending || isWaiting;
+  const cols = hasCheck ? 13 : 12;
   if(!rows.length){
     tbody.innerHTML=`<tr><td colspan="${cols-1}">ไม่พบข้อมูล</td></tr>`;
     return;
   }
   // แสดง/ซ่อน checkbox col
-  document.getElementById('th-check').style.display = isPending ? '' : 'none';
+  document.getElementById('th-check').style.display = hasCheck ? '' : 'none';
 
   // Group by month for subtotal rows
   let html='', curMonth='', monthNet=0, monthCount=0;
@@ -1652,7 +1685,7 @@ function renderTable(){
     const mo=String(r.taxdate||r.duedate||'').slice(0,7);
     if(mo!==curMonth){
       if(curMonth){
-        const extraCol = isPending ? '<td></td>' : '';
+        const extraCol = hasCheck ? '<td></td>' : '';
         html+=`<tr style="background:#f0f4ff">
           ${extraCol}
           <td colspan="9" style="font-size:12px;font-weight:700;color:#5b6473;padding:5px 10px">
@@ -1669,7 +1702,9 @@ function renderTable(){
     const invoiceText=r.invoice_status||'รอเอกสาร';
     const checkCell = isPending
       ? `<td style="text-align:center;width:36px"><input type="checkbox" class="rowCheck" data-id="${r.id}" onchange="updateRunBtn()" style="width:16px;height:16px;cursor:pointer"></td>`
-      : '';
+      : isWaiting
+        ? `<td style="text-align:center;width:36px"><input type="checkbox" class="rcvCheck" data-id="${r.id}" onchange="updateReceiveBtn()" style="width:16px;height:16px;cursor:pointer"></td>`
+        : '';
     html+=`<tr>
       ${checkCell}
       <td class="numCell"><div class="recMain">${r.recno||'-'}</div></td>
@@ -1722,14 +1757,74 @@ async function patch(id,p){
   const t=await r.text();
   if(!r.ok) throw Error(t);
 }
+// ── Bulk Receive ──────────────────────────────────────────
+let _bulkReceiveIds=[];
+
+function updateReceiveBtn(){
+  const checked=Array.from(document.querySelectorAll('.rcvCheck:checked'));
+  const btn=document.getElementById('btnBulkReceive');
+  const lbl=document.getElementById('selectedReceiveCount');
+  if(btn){
+    btn.textContent=`✔ รับเอกสาร (${checked.length} รายการ)`;
+    btn.disabled=checked.length===0;
+    btn.style.opacity=checked.length>0?'1':'.5';
+    btn.style.cursor=checked.length>0?'pointer':'not-allowed';
+  }
+  if(lbl) lbl.textContent=checked.length>0?`— เลือก ${checked.length} รายการ`:'— ยังไม่ได้เลือก';
+}
+
+function toggleSelectAllReceive(v){
+  document.querySelectorAll('.rcvCheck').forEach(c=>c.checked=v);
+  updateReceiveBtn();
+}
+
+function _openReceiveDialog(ids){
+  _bulkReceiveIds=ids;
+  const rows=ids.map(id=>allRows.find(r=>r.id===id)).filter(Boolean);
+  const totalNet=rows.reduce((s,r)=>s+Number(r.net_amount||0),0);
+  const recnos=rows.map(r=>r.recno).join(', ');
+  document.getElementById('bulkReceiveInfo').innerHTML=
+    `เลือกไว้ <b>${rows.length} รายการ</b> · มูลค่ารวม <b>${money(totalNet)} บาท</b>`+
+    `<br><span style="font-size:12px;color:#728197">${recnos}</span>`;
+  document.getElementById('bulkReceiveDate').value=today();
+  document.getElementById('bulkReceiveDialog').showModal();
+}
+
+function openBulkReceiveDialog(){
+  const ids=Array.from(document.querySelectorAll('.rcvCheck:checked')).map(c=>c.dataset.id);
+  if(!ids.length) return;
+  _openReceiveDialog(ids);
+}
+
+function closeBulkReceiveDialog(){
+  document.getElementById('bulkReceiveDialog').close();
+}
+
+async function confirmBulkReceive(){
+  const rd=document.getElementById('bulkReceiveDate').value;
+  if(!rd){ showMsg('กรุณาเลือกวันที่รับเอกสาร'); return; }
+  const btn=document.getElementById('btnConfirmBulkReceive');
+  if(btn){ btn.disabled=true; btn.textContent='กำลังบันทึก...'; }
+  closeBulkReceiveDialog();
+  let ok=0, fail=0;
+  for(const id of _bulkReceiveIds){
+    const row=allRows.find(r=>r.id===id);
+    if(!row) continue;
+    // delay_days = receive_date − sla_due_date (ไม่ใช้วันนี้)
+    const sla=row.sla_due_date||row.taxdate||row.duedate;
+    const d=calc(sla,rd);
+    const p={receive_status:'รับเอกสารแล้ว',receive_date:rd,invoice_status:'รอตั้งหนี้',delay_days:d,delay_level:getLevel(d)};
+    try{ await patch(id,p); Object.assign(row,p); ok++; }
+    catch(e){ fail++; }
+  }
+  if(btn){ btn.disabled=false; btn.textContent='ยืนยันรับเอกสาร'; }
+  renderAll();
+  showMsg(ok>0?`รับเอกสารสำเร็จ ${ok} รายการ${fail?` (ผิดพลาด ${fail})`:''}`:'รับเอกสารไม่สำเร็จ', ok>0);
+}
+
+// single-item receive (เรียกจาก detail dialog)
 async function markReceived(id){
-  const row=allRows.find(x=>x.id===id);
-  if(!confirm('รับเอกสาร Recno '+row.recno+' ?')) return;
-  const rd=today(), sla=row.sla_due_date||row.taxdate||row.duedate, d=calc(sla,rd);
-  const p={receive_status:'รับเอกสารแล้ว', receive_date:rd, invoice_status:'รอตั้งหนี้', delay_days:d, delay_level:getLevel(d)};
-  try{
-    await patch(id,p); Object.assign(row,p); renderAll(); showMsg('รับเอกสารสำเร็จ '+row.recno,true);
-  }catch(e){ showMsg('รับเอกสารไม่สำเร็จ: '+e.message); }
+  _openReceiveDialog([id]);
 }
 async function undoReceive(id){
   const r=allRows.find(x=>x.id===id);
@@ -2554,6 +2649,15 @@ document.getElementById('loginName').addEventListener('keydown',function(e){
 setInputs();
 currentTab='completed_invoice';
 updateLayout();
+
+// Pre-fill config inputs ด้วยค่าที่มีอยู่ (localStorage หรือ default)
+(function(){
+  const c=getConfig();
+  const uEl=document.getElementById('supabaseUrl');
+  const kEl=document.getElementById('supabaseKey');
+  if(uEl) uEl.value=c.url||'';
+  if(kEl) kEl.value=c.key||'';
+})();
 
 // Check saved user
 const savedUser = localStorage.getItem('APV_USERNAME')||'';
